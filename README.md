@@ -15,7 +15,7 @@ spindrift('in.pdf')
    .rotate(90)
    .deflate()
    .inflate()
-   .crop(100, 100, 300, 200) # left, bottom, right, top
+   .crop(100, 100, 300, 200) // left, bottom, right, top
    .compile().pipe(fs.createWriteStream('out.pdf'));
 ```
 
