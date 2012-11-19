@@ -13,9 +13,9 @@ spindrift('in.pdf')
    .even()
    .odd()
    .rotate(90)
-   .uncompress()
-   .compress()
-   .createStream().pipe(fs.createWriteStream('out.pdf'));
+   .deflate()
+   .inflate()
+   .compile().pipe(fs.createWriteStream('out.pdf'));
 ```
 
 ## Requirements
