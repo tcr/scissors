@@ -5,6 +5,7 @@ PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick
 ## Future API
 
 ```javascript
+var spindrift = require('spindrift');
 spindrift('path.pdf').subset(7, 24).temp(function (err, pdf) {
 	pdf.rotate()
 });
