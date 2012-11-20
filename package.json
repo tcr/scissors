@@ -14,5 +14,6 @@
   },
   "author": "Tim Cameron Ryan",
   "license": "MIT",
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "keywords": ["pdf", "manipulation", "postscript", "document", "split", "join", "crop"]
 }
