@@ -24,7 +24,8 @@ pdf.pngStream(300).pipe(fs.createWriteStream('out-page1.png')); // first page at
 
 ## Requirements
 
-Install [PDFTK (http://www.pdflabs.com/docs/install-pdftk/)](http://www.pdflabs.com/docs/install-pdftk/) on your system.
+* Install [PDFTK (http://www.pdflabs.com/docs/install-pdftk/)](http://www.pdflabs.com/docs/install-pdftk/) on your system.
+* Ensure you have Ghostscript installed on your system (`gs` from the command line).
 
 ## References
 

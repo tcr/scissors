@@ -1,6 +1,6 @@
 {
   "name": "spindrift",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew. ",
   "main": "spindrift.js",
   "dependencies": {
