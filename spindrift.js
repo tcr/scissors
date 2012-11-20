@@ -85,6 +85,13 @@ Command.prototype.inflate = function () {
 		]);
 };
 
+Command.prototype.repair = function () {
+	// pdftk extraction of a single page causes issues for some reason.
+	return this._push([
+		'pdftk', this._input(), 'output', '-',
+		]);
+};
+
 Command.prototype.crop = function (l, b, r, t) {
 	this.inflate();
 	return this._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
@@ -92,10 +99,38 @@ Command.prototype.crop = function (l, b, r, t) {
 
 Command.prototype.pngStream = function (dpi) {
 	this._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
-	return this.pdfStream();
+	return this._exec();
 };
 
 Command.prototype.pdfStream = function () {
+	this.repair();
+	return this._exec();
+};
+
+/*
+
+// TODO content extract
+
+http://git.ghostscript.com/?p=ghostpdl.git;a=blob;f=gs/lib/ps2ascii.ps;h=2b0e2d581094b4c6397f926817872a05dae8af7c;hb=HEAD
+
+.commands() => []
+.bound(l, b, r, t)
+.group(resolution) // combines strings into groups, logically higher groups?
+.text()
+.rows() // susses out rows of elements
+.columns() // susses out columns of elements
+
+gs [
+  '-q', '-dNODISPLAY',
+  '-P-',
+  '-dSAFER',
+  '-dDELAYBIND',
+  '-dWRITESYSTEMDICT',
+  '-dCOMPLEX', 'contrib/ps2ascii.ps',
+  this._input(), '-c', 'quit']
+  */
+
+Command.prototype._exec = function () {
 	return this.commands.reduce(function (input, command) {
 	  var prog = spawn(command[0], command.slice(1));
 	  console.error('spawn:', command.join(' '));
