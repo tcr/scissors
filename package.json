@@ -5,7 +5,8 @@
   "main": "spindrift.js",
   "dependencies": {
     "temp": "~0.4.0",
-    "bufferjs": "~2.0.0"
+    "bufferjs": "~2.0.0",
+    "bufferstream": "~0.5.1"
   },
   "devDependencies": {},
   "repository": {
@@ -15,5 +16,13 @@
   "author": "Tim Cameron Ryan",
   "license": "MIT",
   "readmeFilename": "README.md",
-  "keywords": ["pdf", "manipulation", "postscript", "document", "split", "join", "crop"]
+  "keywords": [
+    "pdf",
+    "manipulation",
+    "postscript",
+    "document",
+    "split",
+    "join",
+    "crop"
+  ]
 }

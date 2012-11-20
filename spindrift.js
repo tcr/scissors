@@ -2,7 +2,10 @@ var fs = require('fs');
 var spawn = require('child_process').spawn;
 var path = require('path');
 
+var BufferStream = require('bufferstream');
 var temp = require('temp');
+
+// spindrift
 
 function Command (input) {
 	this.input = input;
@@ -107,6 +110,47 @@ Command.prototype.pdfStream = function () {
 	return this._exec();
 };
 
+Command.prototype.textStream = function () {
+	var stream = new BufferStream({
+		size: 'flexible'
+	});
+	var buf = [];
+	stream.split('\n', function (line) {
+	  var tokens = String(line).split(/[ ](?=[^\)]*?(?:\(|$))/);
+
+	  // Simple sequential string detection.
+	  if (tokens[0] == 'S') {
+	  	var str = tokens[3].replace(/^.|.$/g, '');
+	  	if (str.match(/^\s*$/)) {
+	  		if (buf.length) {
+	  			stream.emit('data', buf.join(' '));
+	  		}
+	  		buf = [];
+	  	} else {
+	  		buf.push(str);
+	  	}
+	  }
+	});
+
+	var gs = spawn('gs', [
+	  '-q', '-dNODISPLAY',
+	  '-P-',
+	  '-dSAFER',
+	  '-dDELAYBIND',
+	  '-dWRITESYSTEMDICT',
+	  '-dCOMPLEX', path.join(__dirname, 'contrib/ps2ascii.ps'),
+	  '-', '-c', 'quit']);
+	this.pdfStream().pipe(gs.stdin);
+	gs.stdout.pipe(stream);
+	gs.stderr.on('data', function (data) {
+	  console.error('gs encountered an error:\n', String(data));
+	});
+	gs.on('exit', function (code) {
+		stream.emit('end');
+	});
+	return stream;
+};
+
 /*
 
 // TODO content extract
@@ -120,14 +164,6 @@ http://git.ghostscript.com/?p=ghostpdl.git;a=blob;f=gs/lib/ps2ascii.ps;h=2b0e2d5
 .rows() // susses out rows of elements
 .columns() // susses out columns of elements
 
-gs [
-  '-q', '-dNODISPLAY',
-  '-P-',
-  '-dSAFER',
-  '-dDELAYBIND',
-  '-dWRITESYSTEMDICT',
-  '-dCOMPLEX', 'contrib/ps2ascii.ps',
-  this._input(), '-c', 'quit']
   */
 
 Command.prototype._exec = function () {
