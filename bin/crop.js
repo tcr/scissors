@@ -65,7 +65,8 @@ function writeCropbox (ins, cropbox) {
 	var gs = spawn('gs', [
 	  '-sDEVICE=pdfwrite',
 	  '-sOutputFile=-',
-	  '-sstdout=/dev/null',
+	  '-q',
+	  //'-sstdout=/dev/null',
 	  '-dNOPAUSE', '-dBATCH',
 	  '-c', '[/CropBox [' + cropbox.join(' ') + '] /PAGES pdfmark',
 	  '-f', '-']);

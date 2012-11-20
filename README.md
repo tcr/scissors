@@ -8,15 +8,18 @@ PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick
 var spindrift = require('spindrift');
 
 // Use and chain any of these commands...
-spindrift('in.pdf')
-   .subset(7, 24)
+var pdf = spindrift('in.pdf')
+   .pages(7, 24)
+   .page(1)
    .even()
    .odd()
    .rotate(90)
    .deflate()
    .inflate()
    .crop(100, 100, 300, 200) // left, bottom, right, top
-   .compile().pipe(fs.createWriteStream('out.pdf'));
+
+pdf.pdfStream().pipe(fs.createWriteStream('out.pdf')); // PDF of compiled output
+pdf.pngStream(300).pipe(fs.createWriteStream('out-page1.png')); // first page at 300 dpi
 ```
 
 ## Requirements

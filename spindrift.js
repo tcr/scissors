@@ -19,12 +19,16 @@ Command.prototype._input = function () {
 	return typeof this.input == 'string' ? fs.realpathSync(this.input) : '-';
 };
 
-Command.prototype.subset = function (min, max) {
+Command.prototype.pages = function (min, max) {
 	return this._push([
 		'pdftk', this._input(),
 		'cat', min + (max === null ? '' : '-' + max),
 		'output', '-'
 		]);
+};
+
+Command.prototype.page = function (page) {
+	return this.pages(page, page);
 };
 
 Command.prototype.odd = function (min, max) {
@@ -86,7 +90,12 @@ Command.prototype.crop = function (l, b, r, t) {
 	return this._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
-Command.prototype.compile = function () {
+Command.prototype.pngStream = function (dpi) {
+	this._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
+	return this.pdfStream();
+};
+
+Command.prototype.pdfStream = function () {
 	return this.commands.reduce(function (input, command) {
 	  var prog = spawn(command[0], command.slice(1));
 	  console.error('spawn:', command.join(' '));
