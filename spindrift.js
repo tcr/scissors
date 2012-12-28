@@ -12,31 +12,40 @@ var async = require('async');
 // Once the promise has been delivered, promise(yourCallback) immediately calls.
 
 function promise () {
-  var queue = [], delivered = null;
+  var queue = [], args = null;
   var promise = function (fn) {
-    if (delivered) {
+    if (promise.delivered) {
       process.nextTick(function () {
-        fn.apply(null, delivered);
+        fn.apply(null, args);
       });
     } else {
       queue.push(fn);
     }
   }
   promise.deliver = function () {
-    delivered = arguments;
+    args = arguments, promise.delivered = true;
     queue.splice(0, queue.length).forEach(function (fn) {
       process.nextTick(function () {
-        fn.apply(null, delivered);
+        fn.apply(null, args);
       });
     });
   }
   return promise;
 }
 
+function proxyStream (a, b) {
+  if (a && b) {
+    a
+      .on('data', b.emit.bind(b, 'data'))
+      .on('end', b.emit.bind(b, 'end'))
+      .on('error', b.emit.bind(b, 'error'));
+  }
+}
+
 // spindrift
 
 function Command (input, ready) {
-  this.input = this.firstInput = input;
+  this.input = input;
   this.commands = [];
   this.onready = promise();
   if (ready !== false) {
@@ -44,16 +53,17 @@ function Command (input, ready) {
   }
 }
 
+Command.prototype._copy = function () {
+  var cmd = new Command();
+  cmd.input = this.input;
+  cmd.commands = this.commands.slice();
+  cmd.onready = this.onready;
+  return cmd;
+}
+
 Command.prototype._push = function (command) {
   this.commands.push(command);
   this.input = command;
-  delete this._pdfimages;
-  return this;
-}
-
-Command.prototype._pop = function () {
-  this.commands.pop();
-  this.input = this.commands[this.commands.length - 1] || this.firstInput;
   return this;
 }
 
@@ -66,9 +76,12 @@ Command.prototype._input = function () {
   }
 };
 
+// Cloning commands.
+
 Command.prototype.pages = function (min, max) {
-  return this._push([
-    'pdftk', this._input(),
+  var cmd = this._copy();
+  return cmd._push([
+    'pdftk', cmd._input(),
     'cat', min + (max === null ? '' : '-' + max),
     'output', '-'
     ]);
@@ -79,30 +92,34 @@ Command.prototype.page = function (page) {
 };
 
 Command.prototype.odd = function (min, max) {
-  return this._push([
-    'pdftk', this._input(),
+  var cmd = this._copy();
+  return cmd._push([
+    'pdftk', cmd._input(),
     'cat', 'odd',
     'output', '-'
     ]);
 };
 
 Command.prototype.even = function (min, max) {
-  return this._push([
-    'pdftk', this._input(),
+  var cmd = this._copy();
+  return cmd._push([
+    'pdftk', cmd._input(),
     'cat', 'even',
     'output', '-'
     ]);
 };
 
 Command.prototype.reverse = function (min, max) {
-  return this._push([
-    'pdftk', this._input(),
+  var cmd = this._copy();
+  return cmd._push([
+    'pdftk', cmd._input(),
     'cat', 'end-1',
     'output', '-'
     ]);
 };
 
 Command.prototype.rotate = function (amount) {
+  var cmd = this._copy();
   this.buffer();
   var amount = Number(amount) % 360, dir = null;
   switch (amount) {
@@ -111,23 +128,25 @@ Command.prototype.rotate = function (amount) {
     case -90: case 270: dir = 'L'; break;
     default: return this;
   }
-  return this._push([
-    'pdftk', this._input(),
+  return cmd._push([
+    'pdftk', cmd._input(),
     'cat', '1-end' + dir,
     'output', '-'
     ]);
 };
 
 Command.prototype.compress = function () {
-  return this._push([
-    'pdftk', this._input(), 'output', '-',
+  var cmd = this._copy();
+  return cmd._push([
+    'pdftk', cmd._input(), 'output', '-',
     'compress'
     ]);
 };
 
 Command.prototype.uncompress = function () {
-  return this._push([
-    'pdftk', this._input(), 'output', '-',
+  var cmd = this._copy();
+  return cmd._push([
+    'pdftk', cmd._input(), 'output', '-',
     'uncompress'
     ]);
 };
@@ -135,33 +154,35 @@ Command.prototype.uncompress = function () {
 Command.prototype.repair = function () {
   // pdftk extraction of a single page causes issues for some reason.
   // "repairing" using pdftk fixes this.
-  var cmd = [
+  var cmd = this._copy();
+  var args = [
     'pdftk', this._input(), 'output', '-',
     ];
   // Don't double-repair.
-  if (JSON.stringify(this.commands[this.commands.length - 1]) != JSON.stringify(cmd)) {
-    this._push(cmd);
+  if (JSON.stringify(this.commands[this.commands.length - 1]) != JSON.stringify(args)) {
+    cmd._push(args);
   }
-  return this;
+  return cmd;
 };
 
 Command.prototype.crop = function (l, b, r, t) {
-  this.uncompress();
-  return this._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
+  var cmd = this.uncompress();
+  return cmd._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
 Command.prototype.pdfStream = function () {
-  this.repair();
-  return this._exec();
+  var cmd = this.repair();
+  return cmd._exec();
 };
 
 Command.prototype.pngStream = function (dpi) {
-  this._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
-  var stream = this._exec();
-  this._pop();
+  var cmd = this.repair();
+  cmd._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
+  var stream = cmd._exec();
   return stream;
 };
 
+// Consumes this.pdfStream()
 Command.prototype._commandStream = function () {
   var stream = new BufferStream({
     size: 'flexible'
@@ -203,6 +224,7 @@ Command.prototype._commandStream = function () {
   return stream;
 };
 
+// Consumes this.pdfStream()
 Command.prototype.contentStream = function () {
   function isNextStringPartOfLastString (b, a, font) {
     // NOTE: This is a completely arbitrary hueristic.
@@ -260,6 +282,7 @@ Command.prototype.contentStream = function () {
   return stream;
 };
 
+// Consumes this.pdfStream()
 Command.prototype.textStream = function () {
   var stream = new Stream();
   this.contentStream().on('data', function (cmd) {
@@ -270,6 +293,7 @@ Command.prototype.textStream = function () {
   return stream;
 };
 
+// Consumes this.pdfStream()
 Command.prototype.extractImageStream = function (i) {
   // NOTE: This is pretty costly and uses another dependency.
   // Preferrably, this would be done in Ghostscript.
@@ -310,15 +334,6 @@ Command.prototype.extractImageStream = function (i) {
 
   return stream;
 };
-
-function proxyStream (a, b) {
-  if (a && b) {
-    a
-      .on('data', b.emit.bind(b, 'data'))
-      .on('end', b.emit.bind(b, 'end'))
-      .on('error', b.emit.bind(b, 'error'));
-  }
-}
 
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();

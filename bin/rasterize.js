@@ -49,7 +49,7 @@ function rasterizeImage (ins, page, dpi, boundingbox) {
 	  	'x' + Math.ceil((boundingbox[3] - boundingbox[1] + 2)*multiplier),
 	  '-dNOPAUSE', '-dBATCH',
 	  '-dFirstPage=' + page, '-dLastPage=' + page,
-	  '-c', '<</Install {-' + (boundingbox[0] - 1) + ' -' + (boundingbox[1] - 1) + ' translate}>> setpagedevice',
+	  '-c', '<</Install {' + (-(boundingbox[0] - 1)) + ' ' + (-(boundingbox[1] - 1)) + ' translate}>> setpagedevice',
 	  '-f', '-']);
 	ins.pipe(gs.stdin);
 	gs.stderr.on('data', function (data) {
