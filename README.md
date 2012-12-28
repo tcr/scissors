@@ -19,7 +19,8 @@ var pdf = spindrift('in.pdf')
    .crop(100, 100, 300, 200) // left, bottom, right, top
 
 // Join multiple files...
-spindrift.join(pdfA, pdfB, pdfC).deflate()...
+var pdfA = spindrift('1.pdf'), pdfB = spindrift('2.pdf'), pdfC = spindrift('3.pdf')
+spindrift.join(pdfA.page(1), pdfB, pdfC.pages(5, 10)).deflate().pdfStream()...
 
 // And output data as streams.
 pdf.pdfStream().pipe(fs.createWriteStream('out.pdf')); // PDF of compiled output
