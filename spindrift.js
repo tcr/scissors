@@ -5,6 +5,7 @@ var Stream = require('stream').Stream;
 
 var BufferStream = require('bufferstream');
 var temp = require('temp');
+var async = require('async');
 
 // Calls functions once a promise has been delivered.
 // Queue functions by using promise(yourCallback); Deliver the promise using promise.deliver().
@@ -15,7 +16,6 @@ function promise () {
   var promise = function (fn) {
     if (delivered) {
       process.nextTick(function () {
-        console.log(delivered);
         fn.apply(null, delivered);
       });
     } else {
@@ -35,9 +35,13 @@ function promise () {
 
 // spindrift
 
-function Command (input) {
+function Command (input, ready) {
   this.input = this.firstInput = input;
   this.commands = [];
+  this.onready = promise();
+  if (ready !== false) {
+    this.onready.deliver();
+  }
 }
 
 Command.prototype._push = function (command) {
@@ -54,7 +58,12 @@ Command.prototype._pop = function () {
 }
 
 Command.prototype._input = function () {
-  return typeof this.input == 'string' ? fs.realpathSync(this.input) : '-';
+  // Non-existant files will throw an error, assume full paths.
+  try {
+    return typeof this.input == 'string' ? fs.realpathSync(this.input) : '-';
+  } catch (e) {
+    return this.input;
+  }
 };
 
 Command.prototype.pages = function (min, max) {
@@ -109,14 +118,14 @@ Command.prototype.rotate = function (amount) {
     ]);
 };
 
-Command.prototype.deflate = function () {
+Command.prototype.compress = function () {
   return this._push([
     'pdftk', this._input(), 'output', '-',
     'compress'
     ]);
 };
 
-Command.prototype.inflate = function () {
+Command.prototype.uncompress = function () {
   return this._push([
     'pdftk', this._input(), 'output', '-',
     'uncompress'
@@ -137,7 +146,7 @@ Command.prototype.repair = function () {
 };
 
 Command.prototype.crop = function (l, b, r, t) {
-  this.inflate();
+  this.uncompress();
   return this._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
@@ -194,7 +203,7 @@ Command.prototype._commandStream = function () {
   return stream;
 };
 
-Command.prototype.elementStream = function () {
+Command.prototype.contentStream = function () {
   function isNextStringPartOfLastString (b, a, font) {
     // NOTE: This is a completely arbitrary hueristic.
     // I wouldn't trust it to not break.
@@ -253,7 +262,7 @@ Command.prototype.elementStream = function () {
 
 Command.prototype.textStream = function () {
   var stream = new Stream();
-  this.elementStream().on('data', function (cmd) {
+  this.contentStream().on('data', function (cmd) {
     if (cmd.type == 'string') {
       stream.emit('data', cmd.string);
     }
@@ -270,7 +279,8 @@ Command.prototype.extractImageStream = function (i) {
     var callback = this._pdfimages = promise();
     temp.mkdir('pdfimages', function (err, dirPath) {
       this.pdfStream()
-        .on('end', function () {
+        .pipe(fs.createWriteStream(path.join(dirPath, 'file.pdf')))
+        .on('close', function () {
           var prog = spawn('pdfimages', ['-j', dirPath + '/file.pdf', dirPath + '/A']);
           prog.stderr.on('data', function (data) {
             process.stderr.write('pdfimages: ' + String(data));
@@ -286,7 +296,6 @@ Command.prototype.extractImageStream = function (i) {
             callback.deliver(files);
           });
         }.bind(this))
-        .pipe(fs.createWriteStream(path.join(dirPath, 'file.pdf')));
     }.bind(this));
   }
 
@@ -296,22 +305,67 @@ Command.prototype.extractImageStream = function (i) {
       stream.emit('error', new Error('Image ' + i + ' out of bounds.'));
       return;
     }
-    fs.createReadStream(pdfimages[i])
-      .on('data', stream.emit.bind(stream, 'data'))
-      .on('end', stream.emit.bind(stream, 'end'))
-      .on('error', stream.emit.bind(stream, 'error'));
+    proxyStream(fs.createReadStream(pdfimages[i]), stream);
   });
 
   return stream;
 };
 
+function proxyStream (a, b) {
+  if (a && b) {
+    a
+      .on('data', b.emit.bind(b, 'data'))
+      .on('end', b.emit.bind(b, 'end'))
+      .on('error', b.emit.bind(b, 'error'));
+  }
+}
+
 Command.prototype._exec = function () {
-  return this.commands.reduce(function (input, command) {
+  var stream = new Stream(), commands = this.commands.slice();
+  this.onready(function () {
+    proxyStream(commands.reduce(function (input, command) {
+      var prog = spawn(command[0], command.slice(1));
+      console.error('spawn:', command.join(' '));
+      if (input) {
+        input.pipe(prog.stdin);
+      }
+      prog.stderr.on('data', function (data) {
+        process.stderr.write(command[0].match(/[^\/]*$/)[0] + ': ' + String(data));
+      });
+      prog.on('exit', function (code) {
+        if (code) {
+          console.error(command[0], 'exited with failure code:', code);
+        }
+      });
+      return prog.stdout;
+    }, null), stream);
+  });
+  return stream;
+}
+
+var spindrift = function (path) {
+  return new Command(path);
+}
+
+var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
+
+spindrift.join = function () {
+  var args = Array.prototype.slice.call(arguments);
+
+  var outfile = joinTemp + '/' + (joinindex++) + '.pdf';
+  var pdf = new Command(outfile, false);
+
+  async.map(args, function (arg, next) {
+    var file = joinTemp + '/' + (joinindex++) + '.pdf';
+    arg.pdfStream()
+      .pipe(fs.createWriteStream(file))
+      .on('close', function () {
+        next(null, file);
+      });
+  }, function (err, files) {
+    command = ['pdftk'].concat(files, ['output', outfile]);
     var prog = spawn(command[0], command.slice(1));
     console.error('spawn:', command.join(' '));
-    if (input) {
-      input.pipe(prog.stdin);
-    }
     prog.stderr.on('data', function (data) {
       process.stderr.write(command[0].match(/[^\/]*$/)[0] + ': ' + String(data));
     });
@@ -319,20 +373,12 @@ Command.prototype._exec = function () {
       if (code) {
         console.error(command[0], 'exited with failure code:', code);
       }
+      // PDF is now ready.
+      pdf.onready.deliver();
     });
-    return prog.stdout;
-  }, null);
-}
-
-var spindrift = function (path) {
-  return new Command(path);
-}
-
-spindrift.join = function () {
-  var args = Array.prototype.slice.call(arguments);
-  args.forEach(function (arg) {
-    if (arg);
   });
+
+  return pdf;
 }
 
 module.exports = spindrift;

@@ -14,25 +14,28 @@ var pdf = spindrift('in.pdf')
    .even()
    .odd()
    .rotate(90)
-   .deflate()
-   .inflate()
+   .compress()
+   .uncompress()
    .crop(100, 100, 300, 200) // left, bottom, right, top
 
+// Join multiple files...
+spindrift.join(pdfA, pdfB, pdfC).deflate()...
+
+// And output data as streams.
 pdf.pdfStream().pipe(fs.createWriteStream('out.pdf')); // PDF of compiled output
-
 pdf.pngStream(300).pipe(fs.createWriteStream('out-page1.png')); // PNG of first page at 300 dpi
-
 pdf.textStream().pipe(process.stdout) // Individual text strings
 
-pdf.elementStream().on('data', console.log) // Individual elements: text with font/color, images, etc.
+// Extract content as text or images:
+pdf.contentStream().on('data', console.log) 
 // { type: 'string', x: 1750, y: 594,
 //   string: 'Reinhold Messner',
 //   font: { height: 112, width: 116, font: 'ZSVUGH+Imago-Book' },
 //   color: { r: 137, g: 123, b: 126 } }
 // { type: 'image', x: 3049, y: 5680, width: 655, height: 810, index: 4 }
 
-pdf.extractImageStream(0) // Extract an image from the page.
-// use with the 'image' element's index property
+// Use the 'index' property of an image element to extract an image:
+pdf.extractImageStream(0)
 ```
 
 ## Requirements
