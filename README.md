@@ -9,14 +9,14 @@ var spindrift = require('spindrift');
 
 // Use and chain any of these commands...
 var pdf = spindrift('in.pdf')
-   .pages(7, 24)
-   .page(1)
-   .even()
-   .odd()
-   .rotate(90)
+   .pages(4, 5, 6, 1, 12) // select or reorder individual pages
+   .range(1, 10) // pages 1-10
+   .even() // select even pages
+   .odd() // select odd pages
+   .rotate(90) // 90, 180, 270, 360
    .compress()
    .uncompress()
-   .crop(100, 100, 300, 200) // left, bottom, right, top
+   .crop(100, 100, 300, 200) // offset in points from left, bottom, right, top
 
 // Join multiple files...
 var pdfA = spindrift('1.pdf'), pdfB = spindrift('2.pdf'), pdfC = spindrift('3.pdf')
@@ -44,14 +44,3 @@ pdf.extractImageStream(0)
 * Install [PDFTK (http://www.pdflabs.com/docs/install-pdftk/)](http://www.pdflabs.com/docs/install-pdftk/) on your system.
 * Ensure you have Ghostscript installed (check by running `gs --version`).
 * *(optional)* To extract individual images from a page, install `pdfimages` with `brew install xpdf` or `apt-get install poppler-utils`.
-
-## References
-
-* http://hzqtc.github.com/2012/04/pdf-tools-merging-extracting-and-cropping.html
-* http://documentcloud.github.com/docsplit/
-* http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/
-* http://segfault.in/2010/07/pdf-manipulations-and-conversions-from-linux-command-prompt/
-* http://www.maths.ox.ac.uk/help/faqs/files/manipulating-pdf-files
-* http://stackoverflow.com/questions/11754556/ghostscript-convert-a-pdf-and-output-in-a-textfile
-* http://right-sock.net/linux/better-convert-pdf-to-jpg-using-ghost-script/
-* http://stackoverflow.com/questions/12484353/how-to-crop-a-section-of-a-pdf-file-to-png-using-ghostscript?lq=1

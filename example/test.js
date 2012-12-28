@@ -2,7 +2,7 @@ var fs = require('fs');
 var spindrift = require('..');
 
 var pdf = spindrift(__dirname + '/test.pdf');
-var page = pdf.page(2);
+var page = pdf.pages(2);
 
 // Streams
 page.pdfStream().pipe(fs.createWriteStream(__dirname + '/test-page.pdf'));

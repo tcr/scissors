@@ -78,7 +78,7 @@ Command.prototype._input = function () {
 
 // Cloning commands.
 
-Command.prototype.pages = function (min, max) {
+Command.prototype.range = function (min, max) {
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
@@ -87,8 +87,14 @@ Command.prototype.pages = function (min, max) {
     ]);
 };
 
-Command.prototype.page = function (page) {
-  return this.pages(page, page);
+Command.prototype.pages = function () {
+  var args = Array.prototype.slice.call(arguments);
+  var cmd = this._copy();
+  return cmd._push([
+    'pdftk', cmd._input(),
+    'cat'].concat(args.map(Number), [
+      'output', '-'
+      ]));
 };
 
 Command.prototype.odd = function (min, max) {
@@ -397,3 +403,20 @@ spindrift.join = function () {
 }
 
 module.exports = spindrift;
+
+/*
+
+references
+
+## References
+
+* http://hzqtc.github.com/2012/04/pdf-tools-merging-extracting-and-cropping.html
+* http://documentcloud.github.com/docsplit/
+* http://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/
+* http://segfault.in/2010/07/pdf-manipulations-and-conversions-from-linux-command-prompt/
+* http://www.maths.ox.ac.uk/help/faqs/files/manipulating-pdf-files
+* http://stackoverflow.com/questions/11754556/ghostscript-convert-a-pdf-and-output-in-a-textfile
+* http://right-sock.net/linux/better-convert-pdf-to-jpg-using-ghost-script/
+* http://stackoverflow.com/questions/12484353/how-to-crop-a-section-of-a-pdf-file-to-png-using-ghostscript?lq=1
+
+*/
