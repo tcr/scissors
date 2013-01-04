@@ -66,7 +66,7 @@ function rasterizeImage (ins, page, dpi, boundingbox) {
 
 function createTempFile (next) {
 	debug('opening temp file');
-	temp.open('spindrift', function (err, info) {
+	temp.open('scissors', function (err, info) {
 		debug('closing temp file', info.path);
 		fs.close(info.fd, function () {
 			debug('closed.');

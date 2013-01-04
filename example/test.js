@@ -1,7 +1,7 @@
 var fs = require('fs');
-var spindrift = require('..');
+var scissors = require('..');
 
-var pdf = spindrift(__dirname + '/test.pdf');
+var pdf = scissors(__dirname + '/test.pdf');
 var page = pdf.pages(2);
 
 // Streams

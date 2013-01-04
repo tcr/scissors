@@ -42,7 +42,7 @@ function proxyStream (a, b) {
   }
 }
 
-// spindrift
+// scissors
 
 function Command (input, ready) {
   this.input = input;
@@ -364,13 +364,13 @@ Command.prototype._exec = function () {
   return stream;
 }
 
-var spindrift = function (path) {
+var scissors = function (path) {
   return new Command(path);
 }
 
 var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
 
-spindrift.join = function () {
+scissors.join = function () {
   var args = Array.prototype.slice.call(arguments);
 
   var outfile = joinTemp + '/' + (joinindex++) + '.pdf';
@@ -402,7 +402,7 @@ spindrift.join = function () {
   return pdf;
 }
 
-module.exports = spindrift;
+module.exports = scissors;
 
 /*
 

@@ -1,14 +1,14 @@
-# spindrift
+# scissors
 
 PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew. 
 
 ## Example
 
 ```javascript
-var spindrift = require('spindrift');
+var scissors = require('scissors');
 
 // Use and chain any of these commands...
-var pdf = spindrift('in.pdf')
+var pdf = scissors('in.pdf')
    .pages(4, 5, 6, 1, 12) // select or reorder individual pages
    .range(1, 10) // pages 1-10
    .even() // select even pages
@@ -19,8 +19,8 @@ var pdf = spindrift('in.pdf')
    .crop(100, 100, 300, 200) // offset in points from left, bottom, right, top
 
 // Join multiple files...
-var pdfA = spindrift('1.pdf'), pdfB = spindrift('2.pdf'), pdfC = spindrift('3.pdf')
-spindrift.join(pdfA.page(1), pdfB, pdfC.pages(5, 10)).deflate().pdfStream()...
+var pdfA = scissors('1.pdf'), pdfB = scissors('2.pdf'), pdfC = scissors('3.pdf')
+scissors.join(pdfA.page(1), pdfB, pdfC.pages(5, 10)).deflate().pdfStream()...
 
 // And output data as streams.
 pdf.pdfStream().pipe(fs.createWriteStream('out.pdf')); // PDF of compiled output
