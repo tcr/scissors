@@ -346,7 +346,6 @@ Command.prototype._exec = function () {
   this.onready(function () {
     proxyStream(commands.reduce(function (input, command) {
       var prog = spawn(command[0], command.slice(1));
-      console.error('spawn:', command.join(' '));
       if (input) {
         input.pipe(prog.stdin);
       }
@@ -386,7 +385,6 @@ scissors.join = function () {
   }, function (err, files) {
     command = ['pdftk'].concat(files, ['output', outfile]);
     var prog = spawn(command[0], command.slice(1));
-    console.error('spawn:', command.join(' '));
     prog.stderr.on('data', function (data) {
       process.stderr.write(command[0].match(/[^\/]*$/)[0] + ': ' + String(data));
     });
