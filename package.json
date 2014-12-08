@@ -4,7 +4,7 @@
   "description": "PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew. ",
   "main": "scissors.js",
   "dependencies": {
-    "async": "~0.1.22",
+    "async": "^0.9.0",
     "bufferjs": "~2.0.0",
     "bufferstream": "~0.5.1",
     "temp": "^0.8.1"
