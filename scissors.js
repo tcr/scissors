@@ -4,7 +4,7 @@ var path = require('path');
 var Stream = require('stream').Stream;
 
 var BufferStream = require('bufferstream');
-var temp = require('temp');
+var temp = require('temp').track();
 var async = require('async');
 
 // Calls functions once a promise has been delivered.
