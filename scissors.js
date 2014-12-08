@@ -283,6 +283,9 @@ Command.prototype.contentStream = function () {
         string: str, font: font, color: color
       });
       str = '';
+      process.nextTick(function() {
+        stream.emit('end');
+      });
     }
   });
   return stream;
@@ -295,7 +298,10 @@ Command.prototype.textStream = function () {
     if (cmd.type == 'string') {
       stream.emit('data', cmd.string);
     }
-  })
+  });
+  this.contentStream().on('end', function () {
+    stream.emit('end');
+  });
   return stream;
 };
 
