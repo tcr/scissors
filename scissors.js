@@ -176,6 +176,30 @@ Command.prototype.crop = function (l, b, r, t) {
   return cmd._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
+
+Command.prototype.dumpData = function () {
+  var cmd = this._copy();
+  cmd._push([
+    'pdftk', cmd._input(),
+    'dump_data'
+    ]);
+  return cmd._exec();
+};
+
+Command.prototype.getNumPages = function(callback) {
+  var output = '';
+  this.dumpData()
+    .on('data', function(buffer) {
+      var part = buffer.toString();
+      output += part;
+    })
+    .on('end', function() {
+      var re = new RegExp("NumberOfPages\: ([0-9]+)", "g");
+      var matches = re.exec(output);
+      callback(matches[1]);
+  });
+};
+
 Command.prototype.pdfStream = function () {
   var cmd = this.repair();
   return cmd._exec();
