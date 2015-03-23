@@ -6,6 +6,7 @@ var Stream = require('stream').Stream;
 var BufferStream = require('bufferstream');
 var temp = require('temp').track();
 var async = require('async');
+var Bluebird = require('bluebird');
 
 // Calls functions once a promise has been delivered.
 // Queue functions by using promise(yourCallback); Deliver the promise using promise.deliver().
@@ -186,20 +187,23 @@ Command.prototype.dumpData = function () {
   return cmd._exec();
 };
 
-Command.prototype.getNumPages = function(callback) {
-  var output = '';
-  this.dumpData()
-    .on('data', function(buffer) {
-      var part = buffer.toString();
-      output += part;
-    })
-    .on('end', function() {
-      var re = new RegExp("NumberOfPages\: ([0-9]+)", "g");
-      var matches = re.exec(output);
-      callback(matches[1]);
-  });
+Command.prototype.getNumPages = function() {
+  var self = this;
+  return new Bluebird(function(resolve, reject) {
+   var output = '';
+   self.dumpData()
+     .on('data', function(buffer) {
+       var part = buffer.toString();
+       output += part;
+     })
+     .on('end', function() {
+       var re = new RegExp("NumberOfPages\: ([0-9]+)", "g");
+       var matches = re.exec(output);
+       resolve(matches[1]);
+     })
+    .on('error', reject);
+  }); 
 };
-
 Command.prototype.pdfStream = function () {
   var cmd = this.repair();
   return cmd._exec();
