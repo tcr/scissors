@@ -47,7 +47,7 @@ function proxyStream (a, b) {
 function Command (input, ready) {
   this.input = input;
   // is input stream?
-  if (typeof this.input !== 'string' && this.input.pipe) {
+  if (typeof this.input !== 'string' && this.input && this.input.pipe) {
     this.stream = this.input;
   } else {
     this.stream = null;
