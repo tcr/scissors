@@ -353,6 +353,7 @@ Command.prototype._exec = function () {
     proxyStream(commands.reduce(function (input, command) {
       var prog = spawn(command[0], command.slice(1));
       if (input) {
+        console.log("INPUT", input);
         input.pipe(prog.stdin);
       }
       prog.stderr.on('data', function (data) {
