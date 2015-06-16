@@ -62,6 +62,7 @@ function Command (input, ready) {
 Command.prototype._copy = function () {
   var cmd = new Command();
   cmd.input = this.input;
+  cmd.stream = this.stream;
   cmd.commands = this.commands.slice();
   cmd.onready = this.onready;
   return cmd;
