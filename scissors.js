@@ -46,6 +46,12 @@ function proxyStream (a, b) {
 
 function Command (input, ready) {
   this.input = input;
+  // is input stream?
+  if (typeof this.input !== 'string' && this.input.pipe) {
+    this.stream = this.input;
+  } else {
+    this.stream = null;
+  }
   this.commands = [];
   this.onready = promise();
   if (ready !== false) {
@@ -349,6 +355,8 @@ Command.prototype.extractImageStream = function (i) {
 
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
+  console.log("this.input", this.stream);
+  var initialValue = this.stream;
   this.onready(function () {
     proxyStream(commands.reduce(function (input, command) {
       var prog = spawn(command[0], command.slice(1));
@@ -365,7 +373,7 @@ Command.prototype._exec = function () {
         }
       });
       return prog.stdout;
-    }, (typeof this.input == 'string' ? null : this.input) ), stream);
+    }, initialValue), stream);
   });
   return stream;
 }
