@@ -259,7 +259,7 @@ Command.prototype.contentStream = function () {
         str += decode(cmd.string);
       } else {
         stream.emit('data', {
-          type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+          type: 'string', x: (first || cmd).x, y: (first || cmd).y,
           string: str, font: font, color: color
         });
         str = decode(cmd.string);
@@ -279,7 +279,7 @@ Command.prototype.contentStream = function () {
   }).on('end', function () {
     if (str) {
       stream.emit('data', {
-        type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+        type: 'string', x: (first || cmd).x, y: (first || cmd).y,
         string: str, font: font, color: color
       });
       str = '';
@@ -364,7 +364,7 @@ Command.prototype._exec = function () {
         }
       });
       return prog.stdout;
-    }, null), stream);
+    }, (typeof this.input == 'string' ? null : this.input) ), stream);
   });
   return stream;
 }
