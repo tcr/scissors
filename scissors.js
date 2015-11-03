@@ -58,6 +58,9 @@ Command.prototype._copy = function () {
   cmd.input = this.input;
   cmd.commands = this.commands.slice();
   cmd.onready = this.onready;
+  cmd.userPass = this.userPass;
+  cmd.ownerPass = this.ownerPass;
+  cmd.allow = this.allow;
   return cmd;
 }
 
@@ -77,6 +80,14 @@ Command.prototype._input = function () {
 };
 
 // Cloning commands.
+
+Command.prototype.encrypt = function(options) {
+  var cmd = this._copy();
+  cmd.ownerPass = options.ownerPass;
+  cmd.userPass = options.userPass;
+  cmd.allow = options.allow;
+  return cmd;
+};
 
 Command.prototype.range = function (min, max) {
   var cmd = this._copy();
@@ -352,10 +363,25 @@ Command.prototype.extractImageStream = function (i) {
 };
 
 Command.prototype._exec = function () {
+  var self = this;
   var stream = new Stream(), commands = this.commands.slice();
   this.onready(function () {
     proxyStream(commands.reduce(function (input, command) {
-      var prog = spawn(command[0], command.slice(1));
+      var args = command.slice(1);
+      if (self.userPass || self.ownerPass) {
+        args.splice(1,0,'input_pw',(self.ownerPass||self.userPass));
+      }
+      if (self.ownerPass) {
+        args.push('owner_pw',self.ownerPass);
+      }
+      if (self.userPass) {
+        args.push('user_pw',self.userPass);
+      }
+      if (self.allow) {
+        args.push('allow');
+        args = args.concat(self.allow);
+      }
+      var prog = spawn(command[0], args);
       if (input) {
         input.pipe(prog.stdin);
       }
