@@ -409,9 +409,9 @@ var scissors = function (path) {
   return new Command(path);
 }
 
-var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
 
 scissors.join = function () {
+  var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
   var args = Array.prototype.slice.call(arguments);
 
   var outfile = joinTemp + '/' + (joinindex++) + '.pdf';
