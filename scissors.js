@@ -97,7 +97,7 @@ Command.prototype.pages = function () {
       ]));
 };
 
-Command.prototype.odd = function (min, max) {
+Command.prototype.odd = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
@@ -106,7 +106,7 @@ Command.prototype.odd = function (min, max) {
     ]);
 };
 
-Command.prototype.even = function (min, max) {
+Command.prototype.even = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
@@ -115,7 +115,7 @@ Command.prototype.even = function (min, max) {
     ]);
 };
 
-Command.prototype.reverse = function (min, max) {
+Command.prototype.reverse = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
@@ -127,7 +127,8 @@ Command.prototype.reverse = function (min, max) {
 Command.prototype.rotate = function (amount) {
   var cmd = this._copy();
   this.buffer();
-  var amount = Number(amount) % 360, dir = null;
+  amount = Number(amount) % 360;
+  var dir = null;
   switch (amount) {
     case 90: case -270: dir = 'R'; break;
     case 180: case -180: dir = 'D'; break;
@@ -162,7 +163,7 @@ Command.prototype.repair = function () {
   // "repairing" using pdftk fixes this.
   var cmd = this._copy();
   var args = [
-    'pdftk', this._input(), 'output', '-',
+    'pdftk', this._input(), 'output', '-'
     ];
   // Don't double-repair.
   if (JSON.stringify(this.commands[this.commands.length - 1]) != JSON.stringify(args)) {
@@ -193,7 +194,7 @@ Command.prototype._commandStream = function () {
   var stream = new BufferStream({
     size: 'flexible'
   });
-  var buf = [];
+  // var buf = [];
   stream.split('\n', function (line) {
     var tokens = String(line).split(/[ ](?=[^\)]*?(?:\(|$))/);
     var data = (function () {
@@ -224,7 +225,7 @@ Command.prototype._commandStream = function () {
   gs.stderr.on('data', function (data) {
     console.error('gs encountered an error:\n', String(data));
   });
-  gs.on('exit', function (code) {
+  gs.on('exit', function (/*code*/) {
     stream.emit('end');
   });
   return stream;
@@ -259,7 +260,7 @@ Command.prototype.contentStream = function () {
         str += decode(cmd.string);
       } else {
         stream.emit('data', {
-          type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+          type: 'string', x: (first || cmd).x, y: (first || cmd).y,
           string: str, font: font, color: color
         });
         str = decode(cmd.string);
@@ -279,7 +280,7 @@ Command.prototype.contentStream = function () {
   }).on('end', function () {
     if (str) {
       stream.emit('data', {
-        type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+        type: 'string', x: (first /*|| cmd*/).x, y: (first /*|| cmd*/).y,
         string: str, font: font, color: color
       });
       str = '';
@@ -384,7 +385,7 @@ scissors.join = function () {
         next(null, file);
       });
   }, function (err, files) {
-    command = ['pdftk'].concat(files, ['output', outfile]);
+    var command = ['pdftk'].concat(files, ['output', outfile]);
     var prog = spawn(command[0], command.slice(1));
     console.error('spawn:', command.join(' '));
     prog.stderr.on('data', function (data) {
