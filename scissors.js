@@ -47,6 +47,12 @@ function proxyStream (a, b) {
 
 function Command (input, ready) {
   this.input = input;
+  // is input stream?
+  if (typeof this.input !== 'string' && this.input && this.input.pipe) {
+    this.stream = this.input;
+  } else {
+    this.stream = null;
+  }
   this.commands = [];
   this.onready = promise();
   if (ready !== false) {
@@ -57,6 +63,7 @@ function Command (input, ready) {
 Command.prototype._copy = function () {
   var cmd = new Command();
   cmd.input = this.input;
+  cmd.stream = this.stream;
   cmd.commands = this.commands.slice();
   cmd.onready = this.onready;
   return cmd;
@@ -381,6 +388,7 @@ Command.prototype.extractImageStream = function (i) {
 
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
+  var initialValue = this.stream;
   this.onready(function () {
     proxyStream(commands.reduce(function (input, command) {
       var prog = spawn(command[0], command.slice(1));
@@ -396,7 +404,7 @@ Command.prototype._exec = function () {
         }
       });
       return prog.stdout;
-    }, null), stream);
+    }, initialValue), stream);
   });
   return stream;
 }
@@ -405,9 +413,9 @@ var scissors = function (path) {
   return new Command(path);
 }
 
-var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
 
 scissors.join = function () {
+  var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
   var args = Array.prototype.slice.call(arguments);
 
   var outfile = joinTemp + '/' + (joinindex++) + '.pdf';
