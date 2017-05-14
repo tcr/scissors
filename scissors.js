@@ -386,6 +386,37 @@ Command.prototype.extractImageStream = function (i) {
   return stream;
 };
 
+Command.prototype.propertyStream = function () {
+  var stream = new BufferStream({
+    size: 'flexible'
+  });
+  stream.split('\n', function (buffer) {
+    var line = String(buffer);
+    var index = line.indexOf(':');
+    if(index > -1) {
+      stream.emit('data', {
+        event: line.slice(0, index),
+        value: parseInt(line.slice(index + 1))
+      })
+    } else {
+      stream.emit('data', {event: line});
+    }
+  });
+
+  var cmd = this._copy();
+  var property_stream = cmd._push([
+    'pdftk', cmd._input(),
+    'dumpdata',
+    'output', '-'
+  ])._exec().pipe(stream);
+
+  property_stream.on('exit', function (code) {
+    stream.emit('end');
+  });
+
+  return stream;
+}
+
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
   var initialValue = this.stream;
