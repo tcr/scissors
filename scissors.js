@@ -88,7 +88,11 @@ Command.prototype.range = function (min, max) {
 };
 
 Command.prototype.pages = function () {
-  var args = Array.prototype.slice.call(arguments);
+  if (Array.isArray(arguments[0])) {
+    var args = arguments[0];
+  } else {
+    var args = Array.prototype.slice.call(arguments);
+  }
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
@@ -259,7 +263,7 @@ Command.prototype.contentStream = function () {
         str += decode(cmd.string);
       } else {
         stream.emit('data', {
-          type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+          type: 'string', x: (first || cmd).x, y: (first || cmd).y,
           string: str, font: font, color: color
         });
         str = decode(cmd.string);
@@ -279,7 +283,7 @@ Command.prototype.contentStream = function () {
   }).on('end', function () {
     if (str) {
       stream.emit('data', {
-        type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+        type: 'string', x: (first || cmd).x, y: (first || cmd).y,
         string: str, font: font, color: color
       });
       str = '';
