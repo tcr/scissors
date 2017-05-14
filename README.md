@@ -2,7 +2,7 @@
 
 # scissors
 
-PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew. 
+PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew.
 
 ## Example
 
@@ -30,7 +30,7 @@ pdf.pngStream(300).pipe(fs.createWriteStream('out-page1.png')); // PNG of first 
 pdf.textStream().pipe(process.stdout) // Individual text strings
 
 // Extract content as text or images:
-pdf.contentStream().on('data', console.log) 
+pdf.contentStream().on('data', console.log)
 // { type: 'string', x: 1750, y: 594,
 //   string: 'Reinhold Messner',
 //   font: { height: 112, width: 116, font: 'ZSVUGH+Imago-Book' },
@@ -44,5 +44,6 @@ pdf.extractImageStream(0)
 ## Requirements
 
 * Install [PDFTK (http://www.pdflabs.com/docs/install-pdftk/)](http://www.pdflabs.com/docs/install-pdftk/) on your system.
+* Mac OS 10.11 requires a patched build available [here] (https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg) as per [this thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
 * Ensure you have Ghostscript installed (check by running `gs --version`).
 * *(optional)* To extract individual images from a page, install `pdfimages` with `brew install xpdf` or `apt-get install poppler-utils`.
