@@ -4,8 +4,9 @@ var path = require('path');
 var Stream = require('stream').Stream;
 
 var BufferStream = require('bufferstream');
-var temp = require('temp');
+var temp = require('temp').track();
 var async = require('async');
+var Bluebird = require('bluebird');
 
 /**
  * Non-standard promise implementation with a simple callback
@@ -59,6 +60,12 @@ function proxyStream (a, b) {
  */
 function Command (input, ready) {
   this.input = input;
+  // is input stream?
+  if (typeof this.input !== 'string' && this.input && this.input.pipe) {
+    this.stream = this.input;
+  } else {
+    this.stream = null;
+  }
   this.commands = [];
   this.onready = promise();
   if (ready !== false) {
@@ -73,6 +80,7 @@ function Command (input, ready) {
 Command.prototype._copy = function () {
   var cmd = new Command();
   cmd.input = this.input;
+  cmd.stream = this.stream;
   cmd.commands = this.commands.slice();
   cmd.onready = this.onready;
   return cmd;
@@ -125,7 +133,11 @@ Command.prototype.range = function (min, max) {
  * @return {Object} A Command instance
  */
 Command.prototype.pages = function () {
-  var args = Array.prototype.slice.call(arguments);
+  if (Array.isArray(arguments[0])) {
+    var args = arguments[0];
+  } else {
+    var args = Array.prototype.slice.call(arguments);
+  }
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
@@ -252,6 +264,33 @@ Command.prototype.crop = function (l, b, r, t) {
   return cmd._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
+Command.prototype.dumpData = function () {
+  var cmd = this._copy();
+  cmd._push([
+    'pdftk', cmd._input(),
+    'dump_data'
+    ]);
+  return cmd._exec();
+};
+
+Command.prototype.getNumPages = function() {
+  var self = this;
+  return new Bluebird(function(resolve, reject) {
+   var output = '';
+   self.dumpData()
+     .on('data', function(buffer) {
+       var part = buffer.toString();
+       output += part;
+     })
+     .on('end', function() {
+       var re = new RegExp("NumberOfPages\: ([0-9]+)", "g");
+       var matches = re.exec(output);
+       resolve(matches[1]);
+     })
+    .on('error', reject);
+  }); 
+};
+
 /**
  * Returns a stream with the PDF data
  * @return {Stream}
@@ -375,6 +414,9 @@ Command.prototype.contentStream = function () {
         string: str, font: font, color: color
       });
       str = '';
+      process.nextTick(function() {
+        stream.emit('end');
+      });
     }
   });
   return stream;
@@ -390,7 +432,10 @@ Command.prototype.textStream = function () {
     if (cmd.type == 'string') {
       stream.emit('data', cmd.string);
     }
-  })
+  });
+  this.contentStream().on('end', function () {
+    stream.emit('end');
+  });
   return stream;
 };
 
@@ -436,12 +481,43 @@ Command.prototype.extractImageStream = function (i) {
   return stream;
 };
 
+Command.prototype.propertyStream = function () {
+  var stream = new BufferStream({
+    size: 'flexible'
+  });
+  stream.split('\n', function (buffer) {
+    var line = String(buffer);
+    var index = line.indexOf(':');
+    if(index > -1) {
+      stream.emit('data', {
+        event: line.slice(0, index),
+        value: parseInt(line.slice(index + 1))
+      })
+    } else {
+      stream.emit('data', {event: line});
+    }
+  });
+
+  var cmd = this._copy();
+  var property_stream = cmd._push([
+    'pdftk', cmd._input(),
+    'dumpdata',
+    'output', '-'
+  ])._exec().pipe(stream);
+
+  property_stream.on('exit', function (code) {
+    stream.emit('end');
+  });
+
+  return stream;
+}
+
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
+  var initialValue = this.stream;
   this.onready(function () {
     proxyStream(commands.reduce(function (input, command) {
       var prog = spawn(command[0], command.slice(1));
-      console.error('spawn:', command.join(' '));
       if (input) {
         input.pipe(prog.stdin);
       }
@@ -454,7 +530,7 @@ Command.prototype._exec = function () {
         }
       });
       return prog.stdout;
-    }, null), stream);
+    }, initialValue), stream);
   });
   return stream;
 }
@@ -463,9 +539,9 @@ var scissors = function (path) {
   return new Command(path);
 }
 
-var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
 
 scissors.join = function () {
+  var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
   var args = Array.prototype.slice.call(arguments);
 
   var outfile = joinTemp + '/' + (joinindex++) + '.pdf';
@@ -481,7 +557,6 @@ scissors.join = function () {
   }, function (err, files) {
     var command = ['pdftk'].concat(files, ['output', outfile]);
     var prog = spawn(command[0], command.slice(1));
-    console.error('spawn:', command.join(' '));
     prog.stderr.on('data', function (data) {
       process.stderr.write(command[0].match(/[^\/]*$/)[0] + ': ' + String(data));
     });
