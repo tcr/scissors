@@ -2,14 +2,17 @@ var fs = require('fs');
 var spawn = require('child_process').spawn;
 var path = require('path');
 var Stream = require('stream').Stream;
-
 var BufferStream = require('bufferstream');
 var temp = require('temp').track();
 var async = require('async');
-var Bluebird = require('bluebird');
+var Promise = require('any-promise');
+
+/*
+    Internal functions
+ */
 
 /**
- * Non-standard internal promise implementation with a simple callback
+ * Non-standard lightweight internal promise implementation with a simple callback
  * Queue functions by using promise(yourCallback); Deliver the promise using
  * promise.deliver(). Once the promise has been delivered, promise(yourCallback)
  * immediately calls.
@@ -72,10 +75,6 @@ function Command (input, ready) {
   }
 }
 
-/*
-    Internal methods
- */
-
 /**
  * Makes a copy of the commands in the queue and adds the input
  * @return {Command} A chainable Command instance
@@ -121,14 +120,15 @@ Command.prototype._input = function () {
 /**
  * Creates a copy of a page range
  * @param  {number} min First page
- * @param  {number} max Last page
+ * @param  {number} max Last page. If omitted, all pages starting with
+ * first page are used.
  * @return {Command} A chainable Command instance
  */
 Command.prototype.range = function (min, max) {
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
-    'cat', min + (max === null ? '' : '-' + max),
+    'cat', min + (max ? '-' + max : ''),
     'output', '-'
     ]);
 };
@@ -516,15 +516,16 @@ Command.prototype.propertyStream = function () {
 }
 
 /**
- * Executes the commands in order and returns a stream with the data of the result
- * document
+ * Executes the commands in order and returns a stream with the data of the
+ * result document
  * @return {Stream}
  */
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
   var initialValue = this.stream;
   this.onready(function () {
-    proxyStream(commands.reduce(function (input, command) {
+    // use result of one command as input for next command
+    var commandStream = commands.reduce(function (input, command) {
       var prog = spawn(command[0], command.slice(1));
       if (input) {
         input.pipe(prog.stdin);
@@ -534,11 +535,15 @@ Command.prototype._exec = function () {
       });
       prog.on('exit', function (code) {
         if (code) {
-          console.error(command[0], 'exited with failure code:', code);
+          var err = new Error(command[0] + ' exited with failure code: ' + code);
+          err.code = code;
+          stream.emit('error', err );
+          console.error(err.message); // TODO Deprecated, will be removed
         }
       });
       return prog.stdout;
-    }, initialValue), stream);
+    }, initialValue);
+    proxyStream(commandStream, stream);
   });
   return stream;
 }
@@ -553,7 +558,7 @@ Command.prototype._exec = function () {
  */
 Command.prototype.getNumPages = function() {
   var self = this;
-  return new Bluebird(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
    var output = '';
    self.dumpData()
      .on('data', function(buffer) {
@@ -575,7 +580,8 @@ Command.prototype.getNumPages = function() {
  * @return {Command} A Command instance
  */
 var scissors = function (path) {
-  return new Command(path);
+  var cmd = new Command(path);
+  return cmd;
 }
 
 /**
