@@ -7,10 +7,13 @@ var BufferStream = require('bufferstream');
 var temp = require('temp');
 var async = require('async');
 
-// Calls functions once a promise has been delivered.
-// Queue functions by using promise(yourCallback); Deliver the promise using promise.deliver().
-// Once the promise has been delivered, promise(yourCallback) immediately calls.
-
+/**
+ * Non-standard promise implementation with a simple callback
+ * Queue functions by using promise(yourCallback); Deliver the promise using
+ * promise.deliver(). Once the promise has been delivered, promise(yourCallback)
+ * immediately calls.
+ * @return {Function}
+ */
 function promise () {
   var queue = [], args = null;
   var promise = function (fn) {
@@ -33,6 +36,13 @@ function promise () {
   return promise;
 }
 
+/**
+ * Forwards stream events "data", "end" and "error" from
+ * stream a to stram b
+ * @param  {stream} a The source stream
+ * @param  {stream} b The target stream
+ * @return {void}
+ */
 function proxyStream (a, b) {
   if (a && b) {
     a
@@ -42,8 +52,11 @@ function proxyStream (a, b) {
   }
 }
 
-// scissors
-
+/**
+ * Prototype for all commands
+ * @param {mixed} input
+ * @param {Boolean} ready Whether the command has been fully executed
+ */
 function Command (input, ready) {
   this.input = input;
   this.commands = [];
@@ -53,6 +66,10 @@ function Command (input, ready) {
   }
 }
 
+/**
+ * Makes a copy of the commands in the queue and adds the input
+ * @return {Object} A Command instance
+ */
 Command.prototype._copy = function () {
   var cmd = new Command();
   cmd.input = this.input;
@@ -61,12 +78,22 @@ Command.prototype._copy = function () {
   return cmd;
 }
 
+/**
+ * Pushes a command to the queue
+ * @param  {Array} command
+ * @return {Object} A Command instance
+ */
 Command.prototype._push = function (command) {
   this.commands.push(command);
   this.input = command;
   return this;
 }
 
+/**
+ * Returns the input value, which is either a string with the path to the
+ * input file, or a BufferStream (?)
+ * @return {String|Object}
+ */
 Command.prototype._input = function () {
   // Non-existant files will throw an error, assume full paths.
   try {
@@ -78,6 +105,12 @@ Command.prototype._input = function () {
 
 // Cloning commands.
 
+/**
+ * Creates a copy of a page range
+ * @param  {Number} min First page
+ * @param  {Number} max Last page
+ * @return {Object} A Command object
+ */
 Command.prototype.range = function (min, max) {
   var cmd = this._copy();
   return cmd._push([
@@ -87,6 +120,10 @@ Command.prototype.range = function (min, max) {
     ]);
 };
 
+/**
+ * Creates a copy of the pages with the given numbers
+ * @return {Object} A Command instance
+ */
 Command.prototype.pages = function () {
   var args = Array.prototype.slice.call(arguments);
   var cmd = this._copy();
@@ -97,6 +134,10 @@ Command.prototype.pages = function () {
       ]));
 };
 
+/**
+ * Creates a copy of all pages with an odd page number
+ * @return {Object} A Command object
+ */
 Command.prototype.odd = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
@@ -106,6 +147,10 @@ Command.prototype.odd = function (/*min, max*/) {
     ]);
 };
 
+/**
+ * Creates a copy of all pages with an even page number
+ * @return {Object} A Command instance
+ */
 Command.prototype.even = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
@@ -115,6 +160,10 @@ Command.prototype.even = function (/*min, max*/) {
     ]);
 };
 
+/**
+ * Creates a copy of the input in reverse order
+ * @return {Object} A Command object
+ */
 Command.prototype.reverse = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
@@ -124,6 +173,12 @@ Command.prototype.reverse = function (/*min, max*/) {
     ]);
 };
 
+/**
+ * Rotages a copy of the input
+ * with the given degree
+ * @param {Number} amount
+ * @return {Object} A Command instance
+ */
 Command.prototype.rotate = function (amount) {
   var cmd = this._copy();
   this.buffer();
@@ -142,6 +197,10 @@ Command.prototype.rotate = function (amount) {
     ]);
 };
 
+/**
+ * Compresses the input
+ * @return {Object} A command instance
+ */
 Command.prototype.compress = function () {
   var cmd = this._copy();
   return cmd._push([
@@ -150,6 +209,10 @@ Command.prototype.compress = function () {
     ]);
 };
 
+/**
+ * Uncompresses the input
+ * @return {Object} A command instance
+ */
 Command.prototype.uncompress = function () {
   var cmd = this._copy();
   return cmd._push([
@@ -158,6 +221,10 @@ Command.prototype.uncompress = function () {
     ]);
 };
 
+/**
+ * Repair the input
+ * @return {Object} A Command instance
+ */
 Command.prototype.repair = function () {
   // pdftk extraction of a single page causes issues for some reason.
   // "repairing" using pdftk fixes this.
@@ -172,16 +239,33 @@ Command.prototype.repair = function () {
   return cmd;
 };
 
+/**
+ * Crop the input with the given margins, the order being left, bottom, right, top
+ * @param  {Number} l Left margin
+ * @param  {Number} b Bottom margins
+ * @param  {Number} r Right margins
+ * @param  {Number} t Top margin
+ * @return {Object} A Command instance
+ */
 Command.prototype.crop = function (l, b, r, t) {
   var cmd = this.uncompress();
   return cmd._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
+/**
+ * Returns a stream with the PDF data
+ * @return {Stream}
+ */
 Command.prototype.pdfStream = function () {
   var cmd = this.repair();
   return cmd._exec();
 };
 
+/**
+ * Returns a stream with the PNG data in the given resolution
+ * @param  {Number} dpi DPI resolution
+ * @return {Stream}
+ */
 Command.prototype.pngStream = function (dpi) {
   var cmd = this.repair();
   cmd._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
@@ -189,7 +273,11 @@ Command.prototype.pngStream = function (dpi) {
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * (Internal) Returns a stream with JSON data parsed from the raw PDF data.
+ * Consumes this.pdfStream()
+ * @return {BufferStream}
+ */
 Command.prototype._commandStream = function () {
   var stream = new BufferStream({
     size: 'flexible'
@@ -231,7 +319,10 @@ Command.prototype._commandStream = function () {
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * Returns a stream with JSON content data aggregated from this._commandStream()
+ * @return {Stream}
+ */
 Command.prototype.contentStream = function () {
   function isNextStringPartOfLastString (b, a, font) {
     // NOTE: This is a completely arbitrary hueristic.
@@ -289,7 +380,10 @@ Command.prototype.contentStream = function () {
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * Returns a Stream with JSON content data aggregated from this._commandStream()
+ * @return {Stream}
+ */
 Command.prototype.textStream = function () {
   var stream = new Stream();
   this.contentStream().on('data', function (cmd) {
