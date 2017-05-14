@@ -4,8 +4,9 @@ var path = require('path');
 var Stream = require('stream').Stream;
 
 var BufferStream = require('bufferstream');
-var temp = require('temp');
+var temp = require('temp').track();
 var async = require('async');
+var Bluebird = require('bluebird');
 
 // Calls functions once a promise has been delivered.
 // Queue functions by using promise(yourCallback); Deliver the promise using promise.deliver().
@@ -180,6 +181,33 @@ Command.prototype.crop = function (l, b, r, t) {
   return cmd._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
+
+Command.prototype.dumpData = function () {
+  var cmd = this._copy();
+  cmd._push([
+    'pdftk', cmd._input(),
+    'dump_data'
+    ]);
+  return cmd._exec();
+};
+
+Command.prototype.getNumPages = function() {
+  var self = this;
+  return new Bluebird(function(resolve, reject) {
+   var output = '';
+   self.dumpData()
+     .on('data', function(buffer) {
+       var part = buffer.toString();
+       output += part;
+     })
+     .on('end', function() {
+       var re = new RegExp("NumberOfPages\: ([0-9]+)", "g");
+       var matches = re.exec(output);
+       resolve(matches[1]);
+     })
+    .on('error', reject);
+  }); 
+};
 Command.prototype.pdfStream = function () {
   var cmd = this.repair();
   return cmd._exec();
@@ -287,6 +315,9 @@ Command.prototype.contentStream = function () {
         string: str, font: font, color: color
       });
       str = '';
+      process.nextTick(function() {
+        stream.emit('end');
+      });
     }
   });
   return stream;
@@ -299,7 +330,10 @@ Command.prototype.textStream = function () {
     if (cmd.type == 'string') {
       stream.emit('data', cmd.string);
     }
-  })
+  });
+  this.contentStream().on('end', function () {
+    stream.emit('end');
+  });
   return stream;
 };
 
@@ -350,7 +384,6 @@ Command.prototype._exec = function () {
   this.onready(function () {
     proxyStream(commands.reduce(function (input, command) {
       var prog = spawn(command[0], command.slice(1));
-      console.error('spawn:', command.join(' '));
       if (input) {
         input.pipe(prog.stdin);
       }
@@ -390,7 +423,6 @@ scissors.join = function () {
   }, function (err, files) {
     command = ['pdftk'].concat(files, ['output', outfile]);
     var prog = spawn(command[0], command.slice(1));
-    console.error('spawn:', command.join(' '));
     prog.stderr.on('data', function (data) {
       process.stderr.write(command[0].match(/[^\/]*$/)[0] + ': ' + String(data));
     });
