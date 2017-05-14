@@ -9,7 +9,7 @@ var async = require('async');
 var Bluebird = require('bluebird');
 
 /**
- * Non-standard promise implementation with a simple callback
+ * Non-standard internal promise implementation with a simple callback
  * Queue functions by using promise(yourCallback); Deliver the promise using
  * promise.deliver(). Once the promise has been delivered, promise(yourCallback)
  * immediately calls.
@@ -39,10 +39,9 @@ function promise () {
 
 /**
  * Forwards stream events "data", "end" and "error" from
- * stream a to stram b
- * @param  {stream} a The source stream
- * @param  {stream} b The target stream
- * @return {void}
+ * stream a to stream b
+ * @param  {Stream} a The source stream
+ * @param  {Stream} b The target stream
  */
 function proxyStream (a, b) {
   if (a && b) {
@@ -54,7 +53,7 @@ function proxyStream (a, b) {
 }
 
 /**
- * Prototype for all commands
+ * Constructor of Command instance
  * @param {mixed} input
  * @param {Boolean} ready Whether the command has been fully executed
  */
@@ -73,9 +72,13 @@ function Command (input, ready) {
   }
 }
 
+/*
+    Internal methods
+ */
+
 /**
  * Makes a copy of the commands in the queue and adds the input
- * @return {Object} A Command instance
+ * @return {Command} A chainable Command instance
  */
 Command.prototype._copy = function () {
   var cmd = new Command();
@@ -89,7 +92,7 @@ Command.prototype._copy = function () {
 /**
  * Pushes a command to the queue
  * @param  {Array} command
- * @return {Object} A Command instance
+ * @return {Command} A chainable Command instance
  */
 Command.prototype._push = function (command) {
   this.commands.push(command);
@@ -99,8 +102,8 @@ Command.prototype._push = function (command) {
 
 /**
  * Returns the input value, which is either a string with the path to the
- * input file, or a BufferStream (?)
- * @return {String|Object}
+ * input file, or a Command instance (?)
+ * @return {string}
  */
 Command.prototype._input = function () {
   // Non-existant files will throw an error, assume full paths.
@@ -111,13 +114,15 @@ Command.prototype._input = function () {
   }
 };
 
-// Cloning commands.
+/*
+    Chainable instance methods, return a Command instance
+ */
 
 /**
  * Creates a copy of a page range
- * @param  {Number} min First page
- * @param  {Number} max Last page
- * @return {Object} A Command object
+ * @param  {number} min First page
+ * @param  {number} max Last page
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.range = function (min, max) {
   var cmd = this._copy();
@@ -130,14 +135,12 @@ Command.prototype.range = function (min, max) {
 
 /**
  * Creates a copy of the pages with the given numbers
- * @return {Object} A Command instance
+ * @param {(...Number|Array)} Page number, either as an array or as arguments
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.pages = function () {
-  if (Array.isArray(arguments[0])) {
-    var args = arguments[0];
-  } else {
-    var args = Array.prototype.slice.call(arguments);
-  }
+  var args = (Array.isArray(arguments[0])) ?
+    arguments[0] : Array.prototype.slice.call(arguments);
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
@@ -148,7 +151,7 @@ Command.prototype.pages = function () {
 
 /**
  * Creates a copy of all pages with an odd page number
- * @return {Object} A Command object
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.odd = function (/*min, max*/) {
   var cmd = this._copy();
@@ -161,7 +164,7 @@ Command.prototype.odd = function (/*min, max*/) {
 
 /**
  * Creates a copy of all pages with an even page number
- * @return {Object} A Command instance
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.even = function (/*min, max*/) {
   var cmd = this._copy();
@@ -174,7 +177,7 @@ Command.prototype.even = function (/*min, max*/) {
 
 /**
  * Creates a copy of the input in reverse order
- * @return {Object} A Command object
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.reverse = function (/*min, max*/) {
   var cmd = this._copy();
@@ -186,10 +189,9 @@ Command.prototype.reverse = function (/*min, max*/) {
 };
 
 /**
- * Rotages a copy of the input
- * with the given degree
- * @param {Number} amount
- * @return {Object} A Command instance
+ * Rotates a copy of the input with the given degree
+ * @param {number} amount
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.rotate = function (amount) {
   var cmd = this._copy();
@@ -211,7 +213,7 @@ Command.prototype.rotate = function (amount) {
 
 /**
  * Compresses the input
- * @return {Object} A command instance
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.compress = function () {
   var cmd = this._copy();
@@ -223,7 +225,7 @@ Command.prototype.compress = function () {
 
 /**
  * Uncompresses the input
- * @return {Object} A command instance
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.uncompress = function () {
   var cmd = this._copy();
@@ -234,8 +236,8 @@ Command.prototype.uncompress = function () {
 };
 
 /**
- * Repair the input
- * @return {Object} A Command instance
+ * Repairs the input
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.repair = function () {
   // pdftk extraction of a single page causes issues for some reason.
@@ -252,18 +254,29 @@ Command.prototype.repair = function () {
 };
 
 /**
- * Crop the input with the given margins, the order being left, bottom, right, top
- * @param  {Number} l Left margin
- * @param  {Number} b Bottom margins
- * @param  {Number} r Right margins
- * @param  {Number} t Top margin
- * @return {Object} A Command instance
+ * Crops the input with the given margins, the order being left, bottom, right, top
+ * @param  {number} l Left margin
+ * @param  {number} b Bottom margins
+ * @param  {number} r Right margins
+ * @param  {number} t Top margin
+ * @return {Command} A chainable Command instance
  */
 Command.prototype.crop = function (l, b, r, t) {
   var cmd = this.uncompress();
   return cmd._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
+/*
+    Instance methods returning a stream
+ */
+
+/**
+ * Returns a stream with the output of `pdftk infile dump_data` (a report on PDF
+ * document metadata and bookmarks). Used by {@link Command#getNumPages}. Might
+ * be removed or turned into internal function, since it is very similar to
+ * {@link Command#propertyStream}
+ * @return {Stream}
+ */
 Command.prototype.dumpData = function () {
   var cmd = this._copy();
   cmd._push([
@@ -271,24 +284,6 @@ Command.prototype.dumpData = function () {
     'dump_data'
     ]);
   return cmd._exec();
-};
-
-Command.prototype.getNumPages = function() {
-  var self = this;
-  return new Bluebird(function(resolve, reject) {
-   var output = '';
-   self.dumpData()
-     .on('data', function(buffer) {
-       var part = buffer.toString();
-       output += part;
-     })
-     .on('end', function() {
-       var re = new RegExp("NumberOfPages\: ([0-9]+)", "g");
-       var matches = re.exec(output);
-       resolve(matches[1]);
-     })
-    .on('error', reject);
-  }); 
 };
 
 /**
@@ -302,7 +297,7 @@ Command.prototype.pdfStream = function () {
 
 /**
  * Returns a stream with the PNG data in the given resolution
- * @param  {Number} dpi DPI resolution
+ * @param  {number} dpi DPI resolution
  * @return {Stream}
  */
 Command.prototype.pngStream = function (dpi) {
@@ -439,7 +434,11 @@ Command.prototype.textStream = function () {
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * Returns a stream of image data, via the `pdfimages` command
+ * @param  {Number=} [0] i The number of the image to be extracted, defaults to 0.
+ * @return {Stream}
+ */
 Command.prototype.extractImageStream = function (i) {
   // NOTE: This is pretty costly and uses another dependency.
   // Preferrably, this would be done in Ghostscript.
@@ -481,6 +480,10 @@ Command.prototype.extractImageStream = function (i) {
   return stream;
 };
 
+/**
+ * Returns a stream of property data
+ * @return {Stream}
+ */
 Command.prototype.propertyStream = function () {
   var stream = new BufferStream({
     size: 'flexible'
@@ -505,13 +508,18 @@ Command.prototype.propertyStream = function () {
     'output', '-'
   ])._exec().pipe(stream);
 
-  property_stream.on('exit', function (code) {
+  property_stream.on('exit', function () {
     stream.emit('end');
   });
 
   return stream;
 }
 
+/**
+ * Executes the commands in order and returns a stream with the data of the result
+ * document
+ * @return {Stream}
+ */
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
   var initialValue = this.stream;
@@ -535,11 +543,45 @@ Command.prototype._exec = function () {
   return stream;
 }
 
+/*
+    Instance methods returning Promises
+ */
+
+/**
+ * Returns the number of pages in the document.
+ * @return {Promise}
+ */
+Command.prototype.getNumPages = function() {
+  var self = this;
+  return new Bluebird(function(resolve, reject) {
+   var output = '';
+   self.dumpData()
+     .on('data', function(buffer) {
+       var part = buffer.toString();
+       output += part;
+     })
+     .on('end', function() {
+       var re = new RegExp('NumberOfPages\: ([0-9]+)', 'g');
+       var matches = re.exec(output);
+       resolve(matches[1]);
+     })
+    .on('error', reject);
+  });
+};
+
+/**
+ * Main constructor
+ * @param  {string} path Path to the source PDF
+ * @return {Command} A Command instance
+ */
 var scissors = function (path) {
   return new Command(path);
 }
 
-
+/**
+ * Joins the given pages into one document and returnes a
+ * @return {Command} A chainable Command instance
+ */
 scissors.join = function () {
   var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
   var args = Array.prototype.slice.call(arguments);
@@ -572,13 +614,15 @@ scissors.join = function () {
   return pdf;
 }
 
+
+/*
+  Module export
+ */
 module.exports = scissors;
 
 /*
 
-references
-
-## References
+References
 
 * http://hzqtc.github.com/2012/04/pdf-tools-merging-extracting-and-cropping.html
 * http://documentcloud.github.com/docsplit/
