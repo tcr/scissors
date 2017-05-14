@@ -9,7 +9,12 @@
     "bufferstream": "~0.5.1",
     "async": "~0.1.22"
   },
-  "devDependencies": {},
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^3.3.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/tcr/scissors.git"
