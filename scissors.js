@@ -2,17 +2,22 @@ var fs = require('fs');
 var spawn = require('child_process').spawn;
 var path = require('path');
 var Stream = require('stream').Stream;
-
 var BufferStream = require('bufferstream');
 var temp = require('temp').track();
 var async = require('async');
+var Promise = require('any-promise');
 
-var PDFTKCMD = 'pdftk';
+/*
+    Internal functions
+ */
 
-// Calls functions once a promise has been delivered.
-// Queue functions by using promise(yourCallback); Deliver the promise using promise.deliver().
-// Once the promise has been delivered, promise(yourCallback) immediately calls.
-
+/**
+ * Non-standard lightweight internal promise implementation with a simple callback
+ * Queue functions by using promise(yourCallback); Deliver the promise using
+ * promise.deliver(). Once the promise has been delivered, promise(yourCallback)
+ * immediately calls.
+ * @return {Function}
+ */
 function promise () {
   var queue = [], args = null;
   var promise = function (fn) {
@@ -35,6 +40,12 @@ function promise () {
   return promise;
 }
 
+/**
+ * Forwards stream events "data", "end" and "error" from
+ * stream a to stream b
+ * @param  {Stream} a The source stream
+ * @param  {Stream} b The target stream
+ */
 function proxyStream (a, b) {
   if (a && b) {
     a
@@ -44,10 +55,19 @@ function proxyStream (a, b) {
   }
 }
 
-// scissors
-
+/**
+ * Constructor of Command instance
+ * @param {mixed} input
+ * @param {Boolean} ready Whether the command has been fully executed
+ */
 function Command (input, ready) {
   this.input = input;
+  // is input stream?
+  if (typeof this.input !== 'string' && this.input && this.input.pipe) {
+    this.stream = this.input;
+  } else {
+    this.stream = null;
+  }
   this.commands = [];
   this.onready = promise();
   if (ready !== false) {
@@ -55,23 +75,35 @@ function Command (input, ready) {
   }
 }
 
+/**
+ * Makes a copy of the commands in the queue and adds the input
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype._copy = function () {
   var cmd = new Command();
   cmd.input = this.input;
+  cmd.stream = this.stream;
   cmd.commands = this.commands.slice();
   cmd.onready = this.onready;
-  cmd.userPass = this.userPass;
-  cmd.ownerPass = this.ownerPass;
-  cmd.allow = this.allow;
   return cmd;
 }
 
+/**
+ * Pushes a command to the queue
+ * @param  {Array} command
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype._push = function (command) {
   this.commands.push(command);
   this.input = command;
   return this;
 }
 
+/**
+ * Returns the input value, which is either a string with the path to the
+ * input file, or a Command instance (?)
+ * @return {string}
+ */
 Command.prototype._input = function () {
   // Non-existant files will throw an error, assume full paths.
   try {
@@ -81,66 +113,91 @@ Command.prototype._input = function () {
   }
 };
 
-// Cloning commands.
+/*
+    Chainable instance methods, return a Command instance
+ */
 
-Command.prototype.encrypt = function(options) {
-  var cmd = this._copy();
-  cmd.ownerPass = options.ownerPass;
-  cmd.userPass = options.userPass;
-  cmd.allow = options.allow;
-  return cmd;
-};
-
+/**
+ * Creates a copy of a page range
+ * @param  {number} min First page
+ * @param  {number} max Last page. If omitted, all pages starting with
+ * first page are used.
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype.range = function (min, max) {
   var cmd = this._copy();
   return cmd._push([
-    PDFTKCMD, cmd._input(),
-    'cat', min + (max === null ? '' : '-' + max),
+    'pdftk', cmd._input(),
+    'cat', min + (max ? '-' + max : ''),
     'output', '-'
     ]);
 };
 
+/**
+ * Creates a copy of the pages with the given numbers
+ * @param {(...Number|Array)} Page number, either as an array or as arguments
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype.pages = function () {
-  var args = Array.prototype.slice.call(arguments);
+  var args = (Array.isArray(arguments[0])) ?
+    arguments[0] : Array.prototype.slice.call(arguments);
   var cmd = this._copy();
   return cmd._push([
-    PDFTKCMD, cmd._input(),
+    'pdftk', cmd._input(),
     'cat'].concat(args.map(Number), [
       'output', '-'
       ]));
 };
 
-Command.prototype.odd = function (min, max) {
+/**
+ * Creates a copy of all pages with an odd page number
+ * @return {Command} A chainable Command instance
+ */
+Command.prototype.odd = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
-    PDFTKCMD, cmd._input(),
+    'pdftk', cmd._input(),
     'cat', 'odd',
     'output', '-'
     ]);
 };
 
-Command.prototype.even = function (min, max) {
+/**
+ * Creates a copy of all pages with an even page number
+ * @return {Command} A chainable Command instance
+ */
+Command.prototype.even = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
-    PDFTKCMD, cmd._input(),
+    'pdftk', cmd._input(),
     'cat', 'even',
     'output', '-'
     ]);
 };
 
-Command.prototype.reverse = function (min, max) {
+/**
+ * Creates a copy of the input in reverse order
+ * @return {Command} A chainable Command instance
+ */
+Command.prototype.reverse = function (/*min, max*/) {
   var cmd = this._copy();
   return cmd._push([
-    PDFTKCMD, cmd._input(),
+    'pdftk', cmd._input(),
     'cat', 'end-1',
     'output', '-'
     ]);
 };
 
+/**
+ * Rotates a copy of the input with the given degree
+ * @param {number} amount
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype.rotate = function (amount) {
   var cmd = this._copy();
   this.buffer();
-  var amount = Number(amount) % 360, dir = null;
+  amount = Number(amount) % 360;
+  var dir = null;
   switch (amount) {
     case 90: case -270: dir = 'R'; break;
     case 180: case -180: dir = 'D'; break;
@@ -148,34 +205,46 @@ Command.prototype.rotate = function (amount) {
     default: return this;
   }
   return cmd._push([
-    PDFTKCMD, cmd._input(),
+    'pdftk', cmd._input(),
     'cat', '1-end' + dir,
     'output', '-'
     ]);
 };
 
+/**
+ * Compresses the input
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype.compress = function () {
   var cmd = this._copy();
   return cmd._push([
-    PDFTKCMD, cmd._input(), 'output', '-',
+    'pdftk', cmd._input(), 'output', '-',
     'compress'
     ]);
 };
 
+/**
+ * Uncompresses the input
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype.uncompress = function () {
   var cmd = this._copy();
   return cmd._push([
-    PDFTKCMD, cmd._input(), 'output', '-',
+    'pdftk', cmd._input(), 'output', '-',
     'uncompress'
     ]);
 };
 
+/**
+ * Repairs the input
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype.repair = function () {
   // pdftk extraction of a single page causes issues for some reason.
   // "repairing" using pdftk fixes this.
   var cmd = this._copy();
   var args = [
-    PDFTKCMD, this._input(), 'output', '-',
+    'pdftk', this._input(), 'output', '-'
     ];
   // Don't double-repair.
   if (JSON.stringify(this.commands[this.commands.length - 1]) != JSON.stringify(args)) {
@@ -184,38 +253,70 @@ Command.prototype.repair = function () {
   return cmd;
 };
 
+/**
+ * Crops the input with the given margins, the order being left, bottom, right, top
+ * @param  {number} l Left margin
+ * @param  {number} b Bottom margins
+ * @param  {number} r Right margins
+ * @param  {number} t Top margin
+ * @return {Command} A chainable Command instance
+ */
 Command.prototype.crop = function (l, b, r, t) {
   var cmd = this.uncompress();
   return cmd._push([path.join(__dirname, 'bin/crop.js'), l, b, r, t]);
 };
 
+/*
+    Instance methods returning a stream
+ */
+
+/**
+ * Returns a stream with the output of `pdftk infile dump_data` (a report on PDF
+ * document metadata and bookmarks). Used by {@link Command#getNumPages}. Might
+ * be removed or turned into internal function, since it is very similar to
+ * {@link Command#propertyStream}
+ * @return {Stream}
+ */
+Command.prototype.dumpData = function () {
+  var cmd = this._copy();
+  cmd._push([
+    'pdftk', cmd._input(),
+    'dump_data'
+    ]);
+  return cmd._exec();
+};
+
+/**
+ * Returns a stream with the PDF data
+ * @return {Stream}
+ */
 Command.prototype.pdfStream = function () {
   var cmd = this.repair();
   return cmd._exec();
 };
 
-Command.prototype.pngStream = function (dpi, page, useSimpleRasterize, useCropBox) {
-  return this.imageStream(dpi, 'png', page, useSimpleRasterize, useCropBox);
-};
-
-Command.prototype.jpgStream = function (dpi, page, useSimpleRasterize, useCropBox) {
-  return this.imageStream(dpi, 'jpg', page, useSimpleRasterize, useCropBox);
-};
-
-Command.prototype.imageStream = function (dpi, format, page, useSimpleRasterize, useCropBox) {
+/**
+ * Returns a stream with the PNG data in the given resolution
+ * @param  {number} dpi DPI resolution
+ * @return {Stream}
+ */
+Command.prototype.pngStream = function (dpi) {
   var cmd = this.repair();
-  var rasterizer = useSimpleRasterize ? 'bin/simple_rasterize.js' : 'bin/rasterize.js';
-  cmd._push([path.join(__dirname, rasterizer), this._input(), format || 'png', page || 1, dpi || 72, useCropBox ? 'true' : 'false']);
+  cmd._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
   var stream = cmd._exec();
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * (Internal) Returns a stream with JSON data parsed from the raw PDF data.
+ * Consumes this.pdfStream()
+ * @return {BufferStream}
+ */
 Command.prototype._commandStream = function () {
   var stream = new BufferStream({
     size: 'flexible'
   });
-  var buf = [];
+  // var buf = [];
   stream.split('\n', function (line) {
     var tokens = String(line).split(/[ ](?=[^\)]*?(?:\(|$))/);
     var data = (function () {
@@ -246,17 +347,16 @@ Command.prototype._commandStream = function () {
   gs.stderr.on('data', function (data) {
     console.error('gs encountered an error:\n', String(data));
   });
-  gs.on('error',function(err) {
-    console.error('child process gs encountered an error:\n');
-    throw err;
-  });
-  gs.on('exit', function (code) {
+  gs.on('exit', function (/*code*/) {
     stream.emit('end');
   });
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * Returns a stream with JSON content data aggregated from this._commandStream()
+ * @return {Stream}
+ */
 Command.prototype.contentStream = function () {
   function isNextStringPartOfLastString (b, a, font) {
     // NOTE: This is a completely arbitrary hueristic.
@@ -305,7 +405,7 @@ Command.prototype.contentStream = function () {
   }).on('end', function () {
     if (str) {
       stream.emit('data', {
-        type: 'string', x: (first || cmd).x, y: (first || cmd).y,
+        type: 'string', x: (first /*|| cmd*/).x, y: (first /*|| cmd*/).y,
         string: str, font: font, color: color
       });
       str = '';
@@ -317,7 +417,10 @@ Command.prototype.contentStream = function () {
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * Returns a Stream with JSON content data aggregated from this._commandStream()
+ * @return {Stream}
+ */
 Command.prototype.textStream = function () {
   var stream = new Stream();
   this.contentStream().on('data', function (cmd) {
@@ -331,7 +434,11 @@ Command.prototype.textStream = function () {
   return stream;
 };
 
-// Consumes this.pdfStream()
+/**
+ * Returns a stream of image data, via the `pdfimages` command
+ * @param  {Number=} [0] i The number of the image to be extracted, defaults to 0.
+ * @return {Stream}
+ */
 Command.prototype.extractImageStream = function (i) {
   // NOTE: This is pretty costly and uses another dependency.
   // Preferrably, this would be done in Ghostscript.
@@ -373,26 +480,53 @@ Command.prototype.extractImageStream = function (i) {
   return stream;
 };
 
+/**
+ * Returns a stream of property data
+ * @return {Stream}
+ */
+Command.prototype.propertyStream = function () {
+  var stream = new BufferStream({
+    size: 'flexible'
+  });
+  stream.split('\n', function (buffer) {
+    var line = String(buffer);
+    var index = line.indexOf(':');
+    if(index > -1) {
+      stream.emit('data', {
+        event: line.slice(0, index),
+        value: parseInt(line.slice(index + 1))
+      })
+    } else {
+      stream.emit('data', {event: line});
+    }
+  });
+
+  var cmd = this._copy();
+  var property_stream = cmd._push([
+    'pdftk', cmd._input(),
+    'dumpdata',
+    'output', '-'
+  ])._exec().pipe(stream);
+
+  property_stream.on('exit', function () {
+    stream.emit('end');
+  });
+
+  return stream;
+}
+
+/**
+ * Executes the commands in order and returns a stream with the data of the
+ * result document
+ * @return {Stream}
+ */
 Command.prototype._exec = function () {
-  var self = this;
   var stream = new Stream(), commands = this.commands.slice();
+  var initialValue = this.stream;
   this.onready(function () {
-    proxyStream(commands.reduce(function (input, command) {
-      var args = command.slice(1);
-      if (self.userPass || self.ownerPass) {
-        args.splice(1,0,'input_pw',(self.ownerPass||self.userPass));
-      }
-      if (self.ownerPass) {
-        args.push('owner_pw',self.ownerPass);
-      }
-      if (self.userPass) {
-        args.push('user_pw',self.userPass);
-      }
-      if (self.allow) {
-        args.push('allow');
-        args = args.concat(self.allow);
-      }
-      var prog = spawn(command[0], args);
+    // use result of one command as input for next command
+    var commandStream = commands.reduce(function (input, command) {
+      var prog = spawn(command[0], command.slice(1));
       if (input) {
         input.pipe(prog.stdin);
       }
@@ -401,22 +535,61 @@ Command.prototype._exec = function () {
       });
       prog.on('exit', function (code) {
         if (code) {
-          console.error(command[0], 'exited with failure code:', code);
+          var err = new Error(command[0] + ' exited with failure code: ' + code);
+          err.code = code;
+          stream.emit('error', err );
+          console.error(err.message); // TODO Deprecated, will be removed
         }
       });
       return prog.stdout;
-    }, null), stream);
+    }, initialValue);
+    proxyStream(commandStream, stream);
   });
   return stream;
 }
 
+/*
+    Instance methods returning Promises
+ */
+
+/**
+ * Returns the number of pages in the document.
+ * @return {Promise}
+ */
+Command.prototype.getNumPages = function() {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+   var output = '';
+   self.dumpData()
+     .on('data', function(buffer) {
+       var part = buffer.toString();
+       output += part;
+     })
+     .on('end', function() {
+       var re = new RegExp('NumberOfPages\: ([0-9]+)', 'g');
+       var matches = re.exec(output);
+       resolve(matches[1]);
+     })
+    .on('error', reject);
+  });
+};
+
+/**
+ * Main constructor
+ * @param  {string} path Path to the source PDF
+ * @return {Command} A Command instance
+ */
 var scissors = function (path) {
-  return new Command(path);
+  var cmd = new Command(path);
+  return cmd;
 }
 
-var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
-
+/**
+ * Joins the given pages into one document and returnes a
+ * @return {Command} A chainable Command instance
+ */
 scissors.join = function () {
+  var joinTemp = temp.mkdirSync('pdfimages'), joinindex = 0;
   var args = Array.prototype.slice.call(arguments);
 
   var outfile = joinTemp + '/' + (joinindex++) + '.pdf';
@@ -430,7 +603,7 @@ scissors.join = function () {
         next(null, file);
       });
   }, function (err, files) {
-    command = [PDFTKCMD].concat(files, ['output', outfile]);
+    var command = ['pdftk'].concat(files, ['output', outfile]);
     var prog = spawn(command[0], command.slice(1));
     prog.stderr.on('data', function (data) {
       process.stderr.write(command[0].match(/[^\/]*$/)[0] + ': ' + String(data));
@@ -447,13 +620,15 @@ scissors.join = function () {
   return pdf;
 }
 
+
+/*
+  Module export
+ */
 module.exports = scissors;
 
 /*
 
-references
-
-## References
+References
 
 * http://hzqtc.github.com/2012/04/pdf-tools-merging-extracting-and-cropping.html
 * http://documentcloud.github.com/docsplit/
