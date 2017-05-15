@@ -300,12 +300,31 @@ Command.prototype.pdfStream = function () {
  * @param  {number} dpi DPI resolution
  * @return {Stream}
  */
-Command.prototype.pngStream = function (dpi) {
-  var cmd = this.repair();
-  cmd._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
-  var stream = cmd._exec();
-  return stream;
-};
+ Command.prototype.pngStream = function (dpi, page, useSimpleRasterize, useCropBox) {
+   return this.imageStream(dpi, 'png', page, useSimpleRasterize, useCropBox);
+ };
+
+ /**
+  * Returns a stream with the JPG data in the given resolution
+  * @param  {number} dpi DPI resolution
+  * @return {Stream}
+  */
+ Command.prototype.jpgStream = function (dpi, page, useSimpleRasterize, useCropBox) {
+   return this.imageStream(dpi, 'jpg', page, useSimpleRasterize, useCropBox);
+ };
+
+ /**
+  * Returns a stream with the image data in the given resolution
+  * @param  {number} dpi DPI resolution
+  * @return {Stream}
+  */
+ Command.prototype.imageStream = function (dpi, format, page, useSimpleRasterize, useCropBox) {
+   var cmd = this.repair();
+   var rasterizer = useSimpleRasterize ? 'bin/simple_rasterize.js' : 'bin/rasterize.js';
+   cmd._push([path.join(__dirname, rasterizer), this._input(), format || 'png', page || 1, dpi || 72, useCropBox ? 'true' : 'false']);
+   var stream = cmd._exec();
+   return stream;
+ };
 
 /**
  * (Internal) Returns a stream with JSON data parsed from the raw PDF data.
