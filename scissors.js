@@ -194,9 +194,18 @@ Command.prototype.pdfStream = function () {
   return cmd._exec();
 };
 
-Command.prototype.pngStream = function (dpi) {
+Command.prototype.pngStream = function (dpi, page, useSimpleRasterize, useCropBox) {
+  return this.imageStream(dpi, 'png', page, useSimpleRasterize, useCropBox);
+};
+
+Command.prototype.jpgStream = function (dpi, page, useSimpleRasterize, useCropBox) {
+  return this.imageStream(dpi, 'jpg', page, useSimpleRasterize, useCropBox);
+};
+
+Command.prototype.imageStream = function (dpi, format, page, useSimpleRasterize, useCropBox) {
   var cmd = this.repair();
-  cmd._push([path.join(__dirname, 'bin/rasterize.js'), this._input(), 'pdf', 1, dpi || 72]);
+  var rasterizer = useSimpleRasterize ? 'bin/simple_rasterize.js' : 'bin/rasterize.js';
+  cmd._push([path.join(__dirname, rasterizer), this._input(), format || 'png', page || 1, dpi || 72, useCropBox ? 'true' : 'false']);
   var stream = cmd._exec();
   return stream;
 };
@@ -276,7 +285,7 @@ Command.prototype.contentStream = function () {
         str += decode(cmd.string);
       } else {
         stream.emit('data', {
-          type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+          type: 'string', x: (first || cmd).x, y: (first || cmd).y,
           string: str, font: font, color: color
         });
         str = decode(cmd.string);
@@ -296,7 +305,7 @@ Command.prototype.contentStream = function () {
   }).on('end', function () {
     if (str) {
       stream.emit('data', {
-        type: 'string', x: (first || cmd).x, y: (first || cmd).y, 
+        type: 'string', x: (first || cmd).x, y: (first || cmd).y,
         string: str, font: font, color: color
       });
       str = '';
