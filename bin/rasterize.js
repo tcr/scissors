@@ -37,14 +37,22 @@ function readBoundingBox (ins, page, next) {
 	});
 }
 
-function rasterizeImage (ins, page, dpi, boundingbox) {
+function rasterizeImage (ins, page, dpi, format, boundingbox) {
 	var multiplier = dpi / 72;
+	var device;
+	if (format == 'png') {
+		device = 'png16m';
+	}
+	else {
+		device = 'jpeg';
+	}
+
 	var gs = spawn('gs', [
 		'-q',
-		'-sDEVICE=png16m',
+		'-sDEVICE=' + device,
 	  '-sOutputFile=-',
 	  '-r' + dpi,
-	  '-g' + 
+	  '-g' +
 	  	Math.ceil((boundingbox[2] - boundingbox[0] + 2)*multiplier) +
 	  	'x' + Math.ceil((boundingbox[3] - boundingbox[1] + 2)*multiplier),
 	  '-dNOPAUSE', '-dBATCH',
@@ -93,7 +101,7 @@ createTempFile(function (path) {
 		if (err) {
 			return debug(err);
 		}
-		rasterizeImage(fs.createReadStream(path), page, dpi, boundingbox)
+		rasterizeImage(fs.createReadStream(path), page, dpi, format, boundingbox)
 			.pipe(process.stdout);
 	});
 	inputStream.resume();

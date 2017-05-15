@@ -19,6 +19,11 @@ var pdf = scissors('in.pdf')
    .compress()
    .uncompress()
    .crop(100, 100, 300, 200) // offset in points from left, bottom, right, top
+   .encrypt({
+        userPass: 'foo',
+        ownerPadd: 'bar',
+        allow: ['printing','degradedprinting']
+   })
 
 // Join multiple files...
 var pdfA = scissors('1.pdf'), pdfB = scissors('2.pdf'), pdfC = scissors('3.pdf')
