@@ -12,7 +12,7 @@ require('bufferjs/indexOf');
 // http://stackoverflow.com/questions/6183479/cropping-a-pdf-using-ghostscript-9-01?rq=1
 
 function debug () {
-	console.error.apply(console, arguments);
+	//console.error.apply(console, arguments);
 }
 
 function readBoundingBox (ins, page, next) {
@@ -27,12 +27,12 @@ function readBoundingBox (ins, page, next) {
 	gs.stderr.on('data', function (data) {
 		if (String(data).match(bbox)) {
 			boundingbox = String(data).match(bbox).slice(1,5).map(Number);
-			console.error(boundingbox);
+			debug(boundingbox);
 		}
 	});
 	var bbox = /%%BoundingBox: (\d+) (\d+) (\d+) (\d+)/
 	gs.on('exit', function (code) {
-		console.error('ended');
+		debug('ended');
 	  next(code, boundingbox);
 	});
 }
@@ -61,11 +61,11 @@ function rasterizeImage (ins, page, dpi, format, boundingbox) {
 	  '-f', '-']);
 	ins.pipe(gs.stdin);
 	gs.stderr.on('data', function (data) {
-	  debug('gs encountered an error:\n', String(data));
+	  console.error('gs encountered an error:\n', String(data));
 	});
 	gs.on('exit', function (code) {
 		if (code) {
-	  	debug('gs exited with failure code:', code);
+	  	console.error('gs exited with failure code:', code);
 	  }
 	  debug('Finished writing image.');
 	});
@@ -86,7 +86,7 @@ function createTempFile (next) {
 //stripCropbox(process.stdin, fs)
 
 if (process.argv.length < 5) {
-	debug('Invalid number of arguments.');
+	console.error('Invalid number of arguments.');
 	process.exit(1);
 }
 
@@ -99,7 +99,7 @@ createTempFile(function (path) {
 	var inputStream = input == '-' ? process.stdin : fs.createReadStream(input);
 	readBoundingBox(inputStream, page, function (err, boundingbox) {
 		if (err) {
-			return debug(err);
+			return console.error(err);
 		}
 		rasterizeImage(fs.createReadStream(path), page, dpi, format, boundingbox)
 			.pipe(process.stdout);

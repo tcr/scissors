@@ -6,7 +6,7 @@ var spawn = require('child_process').spawn;
 require('bufferjs/indexOf');
 
 function debug () {
-	console.error.apply(console, arguments);
+	//console.error.apply(console, arguments);
 }
 
 function rasterizeImage (ins, page, dpi, format, useCropBox) {
@@ -34,18 +34,18 @@ function rasterizeImage (ins, page, dpi, format, useCropBox) {
 	if (useCropBox) {
 		gsArgs.unshift('-dUseCropBox');
 	}
-	
+
 	var gs = spawn('gs', gsArgs);
 
 	ins.pipe(gs.stdin);
 
 	gs.stderr.on('data', function (data) {
-		debug('gs encountered an error:\n', String(data));
+		console.error('gs encountered an error:\n', String(data));
 	});
 
 	gs.on('exit', function (code) {
 		if (code) {
-			debug('gs exited with failure code:', code);
+			console.error('gs exited with failure code:', code);
 		}
 		debug('Finished writing image.');
 	});
@@ -54,7 +54,7 @@ function rasterizeImage (ins, page, dpi, format, useCropBox) {
 }
 
 if (process.argv.length < 5) {
-	debug('Invalid number of arguments.');
+	console.error('Invalid number of arguments.');
 	process.exit(1);
 }
 

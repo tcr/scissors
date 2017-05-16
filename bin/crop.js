@@ -12,17 +12,17 @@ require('bufferjs/indexOf');
 // http://stackoverflow.com/questions/6183479/cropping-a-pdf-using-ghostscript-9-01?rq=1
 
 function debug () {
-	console.error.apply(console, arguments);
+	//console.error.apply(console, arguments);
 }
 
 function repairPDF (outs) {
 	var pdftk = spawn('pdftk', ['-', 'output', '-']);
 	pdftk.stderr.on('data', function (data) {
-	  debug('pdftk encountered an error:\n', String(data));
+	  console.error('pdftk encountered an error:\n', String(data));
 	});
 	pdftk.on('exit', function (code) {
 		if (code) {
-	  	debug('pdftk exited with failure code:', code);
+	  	console.error('pdftk exited with failure code:', code);
 	  }
 	});
 	pdftk.stdout.pipe(outs);
@@ -39,7 +39,7 @@ function stripCropbox (ins, outs, next) {
 			for (var j = i; data[j] != '\n'.charCodeAt(0); ) {
 				j++;
 			}
-			debug('Spindrift: found cropbox', String(data.slice(i, j)));
+			debug('Scissors: found cropbox', String(data.slice(i, j)));
 			cropbox = String(data.slice(i, j))
 				.match(/\/CropBox\s+\[([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\]/)
 				.slice(1, 5).map(Number);
@@ -49,7 +49,7 @@ function stripCropbox (ins, outs, next) {
 		}
 	});
 	ins.on('end', function () {
-		debug('Spindrift: Finished stripping cropbox.');
+		debug('Scissors: Finished stripping cropbox.');
 		repair.end();
 	})
 	outs.on('close', function (err) {
@@ -76,9 +76,9 @@ function writeCropbox (ins, cropbox) {
 	});
 	gs.on('exit', function (code) {
 		if (code) {
-	  	debug('gs exited with failure code:', code);
+	  	console.error('gs exited with failure code:', code);
 	  }
-	  debug('Spindrift: Finished writing cropbox.');
+	  debug('Scissors: Finished writing cropbox.');
 	});
 	return gs.stdout;
 }
@@ -86,20 +86,20 @@ function writeCropbox (ins, cropbox) {
 //stripCropbox(process.stdin, fs)
 
 if (process.argv.length < 6) {
-	debug('Invalid number of arguments.');
+	console.error('Invalid number of arguments.');
 	process.exit(1);
 }
 
 var modcropbox = process.argv.slice(2, 6).map(Number);
 
-debug('Spindrift: opening temp file');
+debug('Scissors: opening temp file');
 temp.open('stripCropbox', function (err, info) {
-	debug('Spindrift: closing temp file', info.path);
+	debug('Scissors: closing temp file', info.path);
 	fs.close(info.fd, function () {
-		debug('Spindrift: closed.');
+		debug('Scissors: closed.');
 		stripCropbox(process.stdin, fs.createWriteStream(info.path), function (err, cropbox) {
 			if (err) {
-				return debug(err);
+				return console.error(err);
 			}
 			//fs.createReadStream(info.path).pipe(process.stdout);
 			writeCropbox(fs.createReadStream(info.path), combineCropboxes(cropbox, modcropbox))
