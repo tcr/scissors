@@ -1,6 +1,6 @@
 {
   "name": "scissors",
-  "version": "0.1.1-APS",
+  "version": "1.0.0-alpha",
   "description": "PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew. ",
   "main": "scissors.js",
   "dependencies": {
