@@ -1,5 +1,3 @@
-[![Dependency Status](https://david-dm.org/theapsgroup/scissors.png)](https://david-dm.org/theapsgroup/scissors)
-
 # scissors
 
 PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew.

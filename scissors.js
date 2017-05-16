@@ -1,3 +1,8 @@
+/**
+ * @module scissors
+ */
+
+// imports
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 var path = require('path');
@@ -16,6 +21,7 @@ var Promise = require('any-promise');
  * Queue functions by using promise(yourCallback); Deliver the promise using
  * promise.deliver(). Once the promise has been delivered, promise(yourCallback)
  * immediately calls.
+ * @ignore
  * @return {Function}
  */
 function promise () {
@@ -43,6 +49,7 @@ function promise () {
 /**
  * Forwards stream events "data", "end" and "error" from
  * stream a to stream b
+ * @ignore
  * @param  {Stream} a The source stream
  * @param  {Stream} b The target stream
  */
@@ -57,6 +64,8 @@ function proxyStream (a, b) {
 
 /**
  * Constructor of Command instance
+ * @inner
+ * @constructor
  * @param {mixed} input
  * @param {Boolean} ready Whether the command has been fully executed
  */
@@ -594,7 +603,8 @@ Command.prototype.getNumPages = function() {
 };
 
 /**
- * Main constructor
+ * Entry function
+ * @function
  * @param  {string} path Path to the source PDF
  * @return {Command} A Command instance
  */
@@ -640,8 +650,8 @@ scissors.join = function () {
 }
 
 
-/*
-  Module export
+/**
+ * Exports the scissors function
  */
 module.exports = scissors;
 
