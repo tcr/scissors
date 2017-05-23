@@ -1,9 +1,8 @@
 /* global describe, it */
-var assert = require('assert');
 var scissors = require('../scissors');
 var promisify = require('stream-to-promise');
 var fs = require('fs');
-var Outfile = require('./outfile');
+var Testfile = require('./testfile');
 
 var pdf = __dirname + '/test_data/test.pdf';
 
@@ -14,36 +13,35 @@ describe('Scissors', function() {
   // range() using stream events for async continuation
   describe('#range()', function() {
     it('should extract a range of pdf pages', function(done) {
-      var outfile = new Outfile('range');
+      var testfile = new Testfile('range');
       scissors(pdf)
-      .pages(1,3)
+      .range(1,3)
       .pdfStream()
-      .pipe(fs.createWriteStream(outfile.getPath()))
+      .pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
-        assert.equal(true,fs.existsSync(outfile.getPath()), 'File does not exist');
-        assert.equal(true,fs.statSync(outfile.getPath()).size > 0, 'File size is 0');
-        outfile.remove();
+        testfile.assertExists();
+        //testfile.assertHasLength(3);
+        testfile.remove();
         done();
-      })
-      .on('error',function(err){
-        console.error(err.message);
+      }).on('error',function(err){
+        throw err;
       });
     });
   });
 
   // pages() with Promise
-  describe('#page()', function() {
+  describe('#pages()', function() {
     it('should extract pdf pages', function() {
-      var outfile = new Outfile('pages');
-      return promisify(scissors(pdf).pages(1,3)
-      .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
+      var testfile = new Testfile('pages');
+      return promisify(scissors(pdf)
+      .pages(1,3)
+      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
-        assert.equal(true,fs.existsSync(outfile.getPath()), 'File does not exist');
-        assert.equal(true,fs.statSync(outfile.getPath()).size > 0, 'File size is 0');
-        //outfile.remove();
-      })
-      .catch('error',function(err){
-        console.error(err.message);
+        testfile.assertExists();
+        //testfile.assertHasLength(2);
+        //testfile.remove();
+      }).catch(function(err){
+        throw err;
       });
     });
   });
@@ -51,16 +49,15 @@ describe('Scissors', function() {
   // odd() with Promise
   describe('#odd()', function() {
     it('should extract all odd pages', function() {
-      var outfile = new Outfile('odd');
-      return promisify(scissors(pdf).odd()
-      .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
+      var testfile = new Testfile('odd');
+      return promisify(scissors(pdf)
+      .odd()
+      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
-        assert.equal(true,fs.existsSync(outfile.getPath()), 'File does not exist');
-        assert.equal(true,fs.statSync(outfile.getPath()).size > 0, 'File size is 0');
-        //outfile.remove();
-      })
-      .catch('error',function(err){
-        console.error(err.message);
+        testfile.assertExists();
+        //testfile.remove();
+      }).catch(function(err){
+        throw err;
       });
     });
   });
@@ -68,16 +65,14 @@ describe('Scissors', function() {
   // odd() with Promise
   describe('#even()', function() {
     it('should extract all odd pages', function() {
-      var outfile = new Outfile('even');
+      var testfile = new Testfile('even');
       return promisify(scissors(pdf).even()
-      .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
+      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
-        assert.equal(true,fs.existsSync(outfile.getPath()), 'File does not exist');
-        assert.equal(true,fs.statSync(outfile.getPath()).size > 0, 'File size is 0');
-        //outfile.remove();
-      })
-      .catch('error',function(err){
-        console.error(err.message);
+        testfile.assertExists();
+        //testfile.remove();
+      }).catch(function(err){
+        throw err;
       });
     });
   });
@@ -85,38 +80,81 @@ describe('Scissors', function() {
   // reverse() with Promise
   describe('#reverse()', function() {
     it('should reverse the page order', function() {
-      var outfile = new Outfile('reverse');
+      var testfile = new Testfile('reverse');
       return promisify(scissors(pdf).reverse()
-      .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
+      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
-        assert.equal(true,fs.existsSync(outfile.getPath()), 'File does not exist');
-        assert.equal(true,fs.statSync(outfile.getPath()).size > 0, 'File size is 0');
-        //outfile.remove();
+        testfile.assertExists();
+        //testfile.remove();
       })
-      .catch('error',function(err){
-        console.error(err.message);
-      });
     });
   });
 
   // chained commands
   describe('(chained commands)', function() {
     it('should execute a couple of chained commands', function() {
-      var outfile = new Outfile('odd');
+      var testfile = new Testfile('odd');
       return promisify(scissors(pdf)
       .reverse()
       .odd()
       .range(2,3)
       .pages(1)
-      .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
+      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
-        assert.equal(true,fs.existsSync(outfile.getPath()), 'File does not exist');
-        assert.equal(true,fs.statSync(outfile.getPath()).size > 0, 'File size is 0');
-        //outfile.remove();
-      })
-      .catch('error',function(err){
-        console.error(err.message);
+        testfile.assertExists();
+        //testfile.remove();
+      }).catch(function(err){
+        throw err;
       });
     });
   });
+
+  // rotate
+  describe('#rotate()', function() {
+    it('should rotate the selected pages', function() {
+      var testfile = new Testfile('rotate');
+      return promisify(scissors(pdf)
+      .range(1,3)
+      .rotate(90)
+      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      .then(function(){
+        testfile.assertExists();
+        //testfile.remove();
+      })
+    });
+  });
+
+  // compress
+  describe('#compress()', function() {
+    it('should compress the selected pages', function() {
+      var testfile = new Testfile('compress');
+      return promisify(scissors(pdf)
+      .compress()
+      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      .then(function(){
+        testfile.assertExists();
+      }).catch(function(err){
+        throw err;
+      });
+    });
+  });
+
+  // decompress
+  describe('#uncompress()', function() {
+    it('should uncompress the selected pages', function() {
+      var infile  = new Testfile('compress');
+      var outfile = new Testfile('decompress');
+      return promisify(scissors(infile.getPath())
+      .uncompress()
+      .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
+      .then(function(){
+        outfile.assertExists();
+        //outfile.remove();
+      }).catch(function(err){
+        throw err;
+      });
+    });
+  });
+
+
 });

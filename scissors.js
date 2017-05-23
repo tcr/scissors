@@ -204,7 +204,7 @@ Command.prototype.reverse = function (/*min, max*/) {
  */
 Command.prototype.rotate = function (amount) {
   var cmd = this._copy();
-  this.buffer();
+  //this.buffer();
   amount = Number(amount) % 360;
   var dir = null;
   switch (amount) {
@@ -446,7 +446,7 @@ Command.prototype.contentStream = function () {
 };
 
 /**
- * Returns a Stream with JSON content data aggregated from this._commandStream()
+ * Returns a Stream with text content data aggregated from this._commandStream()
  * @return {Stream}
  */
 Command.prototype.textStream = function () {

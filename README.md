@@ -2,6 +2,10 @@
 
 PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew.
 
+NOTICE: This utility is currently being overhauled. We are merging updates from
+various forks and are adding tests. During this time, the code might be unstable
+or not work at all. Please bear with us.
+
 ## Example
 
 ```javascript
