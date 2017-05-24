@@ -9,7 +9,7 @@ describe('Scissors', function() {
 
   this.timeout(50000);
 
-  //return; // skip time-consuming image tests
+  return; // skip time-consuming image tests
   describe('#jpgStream() - slow rasterize', function() {
     it('should extract a single jpg page (using default rasterize)', function(done) {
       var testfile = new Testfile('page1_default','jpg');

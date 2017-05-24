@@ -60,7 +60,7 @@ Testfile.prototype.compareWithReferenceFile = function(){
   var referenceContent =  fs.readFileSync(referenceFile);
   if( this.ext == 'json'){
     content = JSON.parse(content);
-    referenceContent = JSON.parse(referenceContent);
+    referenceContent = JSON.parse(referenceContent,'utf-8');
     assert.deepEqual(content, referenceContent, 'Output does not match reference content');
   } else {
     for( var i=0; i++; i<Math.min(content.length, referenceContent.length) ){

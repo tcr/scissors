@@ -201,5 +201,25 @@ describe('Scissors', function() {
   //   });
   // });
 
+  // crop
+  describe('#crop()', function() {
+    it('should crop the selected pages', function() {
+      var testfile = new Testfile('crop');
+      return promisify(
+        scissors(pdf)
+        .pages(1,2)
+        .crop(0,0,100,100)
+        .pdfStream()
+        .pipe(fs.createWriteStream(testfile.getPath()))
+      )
+      .then(function(){
+        testfile.assertExists();
+        testfile.remove();
+      }).catch(function(err){
+        throw err;
+      });
+    });
+  });
+
 
 });

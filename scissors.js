@@ -265,11 +265,14 @@ Command.prototype.repair = function () {
 };
 
 /**
- * Crops the input with the given margins, the order being left, bottom, right, top
- * @param  {number} l Left margin
- * @param  {number} b Bottom margins
- * @param  {number} r Right margins
- * @param  {number} t Top margin
+ * Crops the input to a box defined by two x-y coordinates (left bottom / 
+ * right top) in pt (72 points == 1 inch == 25.4 millimeters, 1mm = 2,8pt),
+ * measured from the bottom left (coordinates 0,0).
+ *
+ * @param  {number} l Left x coordinate in pt
+ * @param  {number} b Bottom y coordinate in pt
+ * @param  {number} r Right x coordinate in pt
+ * @param  {number} t Top y coordinate in pt
  * @return {Command} A chainable Command instance
  */
 Command.prototype.crop = function (l, b, r, t) {
