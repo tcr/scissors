@@ -12,7 +12,6 @@ var pdf = __dirname + '/test_data/test.pdf';
 describe('Scissors', function() {
   this.timeout(20000);
 
-
   // textStream()
   describe('#textStream()', function() {
     it('should output text that is contained in the PDF', function() {
@@ -21,7 +20,7 @@ describe('Scissors', function() {
       .textStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
       }).catch(function(err){
         throw err;
       });
@@ -36,7 +35,7 @@ describe('Scissors', function() {
       .textStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
       }).catch(function(err){
         throw err;
       });
@@ -48,16 +47,17 @@ describe('Scissors', function() {
     it('should output metadata about the PDF', function() {
       var testfile = new Testfile('properties','txt');
       var result = {};
-      return promisify(scissors(pdf)
-      .textStream()
+      return scissors(pdf)
+      .propertyStream()
       .on('data',function(data){
         if( data.value){
           result[data.event] = data.value;
         }
-      }))
-      .then(function(){
+      })
+      .on('end', function(){
         fs.writeFileSync(testfile.getPath(), JSON.stringify(result,null,2));
-      }).catch(function(err){
+      })
+      .on('error', function(err){
         throw err;
       });
     });

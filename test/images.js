@@ -9,7 +9,8 @@ describe('Scissors', function() {
 
   this.timeout(50000);
 
-  describe('#jpgStream()', function() {
+  //return; // skip time-consuming image tests
+  describe('#jpgStream() - default rasterize', function() {
     it('should extract a single jpg page (using default rasterize)', function(done) {
       var testfile = new Testfile('page1_default','jpg');
       var dpi = 300;
@@ -19,7 +20,7 @@ describe('Scissors', function() {
       .jpgStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
         done();
       }).on('error',function(err){
         throw err;
@@ -27,7 +28,7 @@ describe('Scissors', function() {
     });
   });
 
-  describe('#pngStream()', function() {
+  describe('#pngStream() - default rasterize', function() {
     it('should extract a single png page (using default rasterize)', function(done) {
       var testfile = new Testfile('page1_default','png');
       var dpi = 300;
@@ -37,7 +38,7 @@ describe('Scissors', function() {
       .pngStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
         done();
       }).on('error',function(err){
         throw err;
@@ -55,7 +56,7 @@ describe('Scissors', function() {
       .jpgStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
         done();
       }).on('error',function(err){
         throw err;
@@ -73,7 +74,7 @@ describe('Scissors', function() {
       .pngStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
         done();
       }).on('error',function(err){
         throw err;
@@ -92,7 +93,7 @@ describe('Scissors', function() {
       .jpgStream(dpi, pageNum, useSimpleRasterize, useCropBox).pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
         done();
       }).on('error',function(err){
         throw err;
@@ -111,7 +112,7 @@ describe('Scissors', function() {
       .pngStream(dpi, pageNum, useSimpleRasterize, useCropBox).pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
         done();
       }).on('error',function(err){
         throw err;

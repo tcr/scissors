@@ -54,7 +54,7 @@ Testfile.prototype.assertHasLength = function(length){
  */
 Testfile.prototype.remove = function(){
   try {
-      fs.unlinkSync(this.path);
+    fs.unlinkSync(this.path); 
   } catch (e) {
     // ignore error if file does not exist
   }

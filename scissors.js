@@ -221,6 +221,7 @@ Command.prototype.rotate = function (amount) {
     ]);
 };
 
+
 /**
  * Compresses the input
  * @return {Command} A chainable Command instance

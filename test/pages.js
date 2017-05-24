@@ -9,7 +9,9 @@ var pdf = __dirname + '/test_data/test.pdf';
 // TODO: better result checks
 
 describe('Scissors', function() {
+  
   this.timeout(20000);
+  
   // range() using stream events for async continuation
   describe('#range()', function() {
     it('should extract a range of pdf pages', function(done) {
@@ -39,7 +41,7 @@ describe('Scissors', function() {
       .then(function(){
         testfile.assertExists();
         //testfile.assertHasLength(2);
-        //testfile.remove();
+        testfile.remove();
       }).catch(function(err){
         throw err;
       });
@@ -55,7 +57,7 @@ describe('Scissors', function() {
       .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
       }).catch(function(err){
         throw err;
       });
@@ -70,7 +72,7 @@ describe('Scissors', function() {
       .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
       }).catch(function(err){
         throw err;
       });
@@ -85,7 +87,7 @@ describe('Scissors', function() {
       .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
       })
     });
   });
@@ -102,7 +104,7 @@ describe('Scissors', function() {
       .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
       }).catch(function(err){
         throw err;
       });
@@ -119,7 +121,7 @@ describe('Scissors', function() {
       .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
-        //testfile.remove();
+        testfile.remove();
       })
     });
   });
@@ -130,9 +132,11 @@ describe('Scissors', function() {
       var testfile = new Testfile('compress');
       return promisify(scissors(pdf)
       .compress()
-      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      .pdfStream()
+      .pipe(fs.createWriteStream(testfile.getPath())))
       .then(function(){
         testfile.assertExists();
+        testfile.remove();
       }).catch(function(err){
         throw err;
       });
@@ -140,21 +144,21 @@ describe('Scissors', function() {
   });
 
   // decompress
-  describe('#uncompress()', function() {
-    it('should uncompress the selected pages', function() {
-      var infile  = new Testfile('compress');
-      var outfile = new Testfile('decompress');
-      return promisify(scissors(infile.getPath())
-      .uncompress()
-      .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
-      .then(function(){
-        outfile.assertExists();
-        //outfile.remove();
-      }).catch(function(err){
-        throw err;
-      });
-    });
-  });
+  // describe('#uncompress()', function() {
+  //   it('should uncompress the selected pages', function() {
+  //     var infile  = new Testfile('compress');
+  //     var outfile = new Testfile('uncompress');
+  //     return promisify(scissors(infile.getPath())
+  //     .uncompress()
+  //     .pdfStream().pipe(fs.createWriteStream(outfile.getPath())))
+  //     .then(function(){
+  //       outfile.assertExists();
+  //       //outfile.remove();
+  //     }).catch(function(err){
+  //       throw err;
+  //     });
+  //   });
+  // });
 
 
 });
