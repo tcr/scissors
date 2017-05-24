@@ -589,17 +589,15 @@ Command.prototype._exec = function () {
 Command.prototype.getNumPages = function() {
   var self = this;
   return new Promise(function(resolve, reject) {
-   var output = '';
-   self.dumpData()
-     .on('data', function(buffer) {
-       var part = buffer.toString();
-       output += part;
-     })
-     .on('end', function() {
-       var re = new RegExp('NumberOfPages\: ([0-9]+)', 'g');
-       var matches = re.exec(output);
-       resolve(matches[1]);
-     })
+    self.propertyStream()
+    .on('data',function(data){
+      if( data.event === 'NumberOfPages' ){
+        resolve(parseInt(data.value));
+      }
+    })
+    .on('end', function() {
+      reject(new Error("PDF does not contain page number data."));
+    })
     .on('error', reject);
   });
 };
