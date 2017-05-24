@@ -204,14 +204,15 @@ Command.prototype.reverse = function (/*min, max*/) {
  */
 Command.prototype.rotate = function (amount) {
   var cmd = this._copy();
-  //this.buffer();
   amount = Number(amount) % 360;
   var dir = null;
   switch (amount) {
-    case 90: case -270: dir = 'R'; break;
-    case 180: case -180: dir = 'D'; break;
-    case -90: case 270: dir = 'L'; break;
-    default: return this;
+    case 90: case -270: dir = 'EAST'; break;
+    case 180: case -180: dir = 'SOUTH'; break;
+    case -90: case 270: dir = 'WEST'; break;
+    case 0: return this;
+    default: 
+    throw new Error("Invalid rotation angle: " + amount);
   }
   return cmd._push([
     'pdftk', cmd._input(),
