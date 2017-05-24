@@ -1,0 +1,994 @@
+[
+  {
+    "type": "string",
+    "x": 2942,
+    "y": 391,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 2942,
+    "y": 391,
+    "string": "1 ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7612,
+    "string": "This is page 1 containing an image. ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7476,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7341,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 5270,
+    "y": 4754,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4653,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "image",
+    "x": 730,
+    "y": 4752,
+    "width": 4533,
+    "height": 2550,
+    "index": 0
+  },
+  {
+    "type": "image",
+    "x": 730,
+    "y": 4752,
+    "width": 4533,
+    "height": 2550,
+    "index": 1
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4519,
+    "string": "Source: https://commons.wikimedia.org/wiki/File:Test_card.png  ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 391,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 2942,
+    "y": 391,
+    "string": "3 ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7612,
+    "string": "vero eos et accusam et justo duo dolores et ea rebum. Stet ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7476,
+    "string": "clita kasd gubergren, no sea takimata sanctus est Lorem ipsum ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7341,
+    "string": "dolor sit amet. Lorem ipsum dolor sit amet, consetetur ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7204,
+    "string": "sadipscing elitr, At accusam aliquyam diam diam dolore dolores ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 7068,
+    "string": "duo eirmod eos erat, et nonumy sed tempor et et invidunt justo ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 6933,
+    "string": "labore Stet clita ea et gubergren, kasd magna no rebum. ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 6796,
+    "string": "sanctus sea sed takimata ut vero voluptua. est Lorem ipsum ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 6660,
+    "string": "dolor sit amet. Lorem ipsum dolor sit amet, consetetur ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 6525,
+    "string": "sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 6388,
+    "string": "labore et dolore magna aliquyam erat.  ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 6252,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 6117,
+    "string": "Consetetur sadipscing elitr, sed diam nonumy eirmod tempor ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5980,
+    "string": "invidunt ut labore et dolore magna aliquyam erat, sed diam ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5844,
+    "string": "voluptua. At vero eos et accusam et justo duo dolores et ea ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5709,
+    "string": "rebum. Stet clita kasd gubergren, no sea takimata sanctus est ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5572,
+    "string": "Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5438,
+    "string": "consetetur sadipscing elitr, sed diam nonumy eirmod tempor ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5301,
+    "string": "invidunt ut labore et dolore magna aliquyam erat, sed diam ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5164,
+    "string": "voluptua. At vero eos et accusam et justo duo dolores et ea ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 5030,
+    "string": "rebum. Stet clita kasd gubergren, no sea takimata sanctus est ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4893,
+    "string": "Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4756,
+    "string": "consetetur sadipscing elitr, sed diam nonumy eirmod tempor ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4622,
+    "string": "invidunt ut labore et dolore magna aliquyam erat, sed diam ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4485,
+    "string": "voluptua. At vero eos et accusam et justo duo dolores et ea ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4348,
+    "string": "rebum. Stet clita kasd gubergren, no sea takimata sanctus.  ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4214,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 4077,
+    "string": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 3940,
+    "string": "diam nonumy eirmod tempor invidunt ut labore et dolore magna ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 3806,
+    "string": "aliquyam erat, sed diam voluptua. At vero eos et accusam et ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 3669,
+    "string": "justo duo dolores et ea rebum. Stet clita kasd gubergren, no ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 3535,
+    "string": "sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 3398,
+    "string": "ipsum dolor sit amet, consetetur sadipscing elitr, sed diam ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 3261,
+    "string": "nonumy eirmod tempor invidunt ut labore et dolore magna ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 3127,
+    "string": "aliquyam erat, sed diam voluptua. At vero eos et accusam et ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2990,
+    "string": "justo duo dolores et ea rebum. Stet clita kasd gubergren, no ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2853,
+    "string": "sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2719,
+    "string": "ipsum dolor sit amet, consetetur sadipscing elitr, sed diam ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2582,
+    "string": "nonumy eirmod tempor invidunt ut labore et dolore magna ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2445,
+    "string": "aliquyam erat, sed diam voluptua. At vero eos et accusam et ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2311,
+    "string": "justo duo dolores et ea rebum. Stet clita kasd gubergren, no ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2174,
+    "string": "sea takimata sanctus est Lorem ipsum dolor sit amet.  ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 2040,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 1903,
+    "string": "Duis autem vel eum iriure dolor in hendrerit in vulputate ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 1766,
+    "string": "velit esse molestie consequat, vel illum dolore eu feugiat ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 1632,
+    "string": "nulla facilisis at vero eros et accumsan et iusto odio ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 1495,
+    "string": "dignissim qui blandit praesent luptatum zzril delenit augue ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 1358,
+    "string": "duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 1224,
+    "string": "amet, consectetuer adipiscing elit, sed diam nonummy nibh ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 1087,
+    "string": "euismod tincidunt ut laoreet dolore magna aliquam erat ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 950,
+    "string": "volutpat.  ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  },
+  {
+    "type": "string",
+    "x": 710,
+    "y": 816,
+    "string": " ",
+    "font": {
+      "height": 418,
+      "width": 183,
+      "font": "AFPSDA+CourierNewPSMT"
+    },
+    "color": {
+      "r": 0,
+      "g": 0,
+      "b": 0
+    }
+  }
+]

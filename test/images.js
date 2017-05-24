@@ -10,7 +10,7 @@ describe('Scissors', function() {
   this.timeout(50000);
 
   //return; // skip time-consuming image tests
-  describe('#jpgStream() - default rasterize', function() {
+  describe('#jpgStream() - slow rasterize', function() {
     it('should extract a single jpg page (using default rasterize)', function(done) {
       var testfile = new Testfile('page1_default','jpg');
       var dpi = 300;
@@ -28,7 +28,7 @@ describe('Scissors', function() {
     });
   });
 
-  describe('#pngStream() - default rasterize', function() {
+  describe('#pngStream() - slow rasterize', function() {
     it('should extract a single png page (using default rasterize)', function(done) {
       var testfile = new Testfile('page1_default','png');
       var dpi = 300;

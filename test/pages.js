@@ -3,6 +3,7 @@ var scissors = require('../scissors');
 var promisify = require('stream-to-promise');
 var fs = require('fs');
 var Testfile = require('./testfile');
+var assert = require('assert-diff');
 
 var pdf = __dirname + '/test_data/test.pdf';
 
@@ -11,6 +12,20 @@ var pdf = __dirname + '/test_data/test.pdf';
 describe('Scissors', function() {
   
   this.timeout(20000);
+  
+  // getNumPages()
+  describe('#getNumPages()', function() {
+    it('should retrieve the number of pages of the PDF document', function() {
+      return scissors(pdf)
+      .getNumPages()
+      .then(function(length){
+        assert.equal(length,10,'Incorrect page number');
+      })
+      .catch(function (err) {
+        throw err;
+      });
+    });
+  });
   
   // range() using stream events for async continuation
   describe('#range()', function() {
@@ -22,9 +37,11 @@ describe('Scissors', function() {
       .pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
-        //testfile.assertHasLength(3);
-        testfile.remove();
-        done();
+        testfile.assertHasLength(3)
+        .then(function(){
+          testfile.remove();  
+          done();
+        });
       }).on('error',function(err){
         throw err;
       });
@@ -35,14 +52,19 @@ describe('Scissors', function() {
   describe('#pages()', function() {
     it('should extract pdf pages', function() {
       var testfile = new Testfile('pages');
-      return promisify(scissors(pdf)
-      .pages(1,3)
-      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      return promisify(
+        scissors(pdf)
+        .pages(1,3)
+        .pdfStream().pipe(fs.createWriteStream(testfile.getPath()))
+      )
       .then(function(){
         testfile.assertExists();
-        //testfile.assertHasLength(2);
-        testfile.remove();
-      }).catch(function(err){
+        return testfile.assertHasLength(2);
+      })
+      .then(function(){
+        testfile.remove();  
+      })
+      .catch(function(err){
         throw err;
       });
     });
@@ -52,13 +74,19 @@ describe('Scissors', function() {
   describe('#odd()', function() {
     it('should extract all odd pages', function() {
       var testfile = new Testfile('odd');
-      return promisify(scissors(pdf)
-      .odd()
-      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      return promisify(
+        scissors(pdf)
+        .odd()
+        .pdfStream().pipe(fs.createWriteStream(testfile.getPath()))
+      )
       .then(function(){
         testfile.assertExists();
-        testfile.remove();
-      }).catch(function(err){
+        return testfile.assertHasLength(5);
+      })
+      .then(function(){
+        testfile.remove();  
+      })
+      .catch(function(err){
         throw err;
       });
     });
@@ -68,8 +96,11 @@ describe('Scissors', function() {
   describe('#even()', function() {
     it('should extract all odd pages', function() {
       var testfile = new Testfile('even');
-      return promisify(scissors(pdf).even()
-      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      return promisify(
+        scissors(pdf).even()
+        .pdfStream()
+        .pipe(fs.createWriteStream(testfile.getPath()))
+      )
       .then(function(){
         testfile.assertExists();
         testfile.remove();
@@ -83,8 +114,11 @@ describe('Scissors', function() {
   describe('#reverse()', function() {
     it('should reverse the page order', function() {
       var testfile = new Testfile('reverse');
-      return promisify(scissors(pdf).reverse()
-      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      return promisify(
+        scissors(pdf).reverse()
+        .pdfStream()
+        .pipe(fs.createWriteStream(testfile.getPath()))
+      )
       .then(function(){
         testfile.assertExists();
         testfile.remove();
@@ -96,12 +130,15 @@ describe('Scissors', function() {
   describe('(chained commands)', function() {
     it('should execute a couple of chained commands', function() {
       var testfile = new Testfile('odd');
-      return promisify(scissors(pdf)
-      .reverse()
-      .odd()
-      .range(2,3)
-      .pages(1)
-      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      return promisify(
+        scissors(pdf)
+        .reverse()
+        .odd()
+        .range(2,3)
+        .pages(1)
+        .pdfStream()
+        .pipe(fs.createWriteStream(testfile.getPath()))
+      )
       .then(function(){
         testfile.assertExists();
         testfile.remove();
@@ -115,10 +152,12 @@ describe('Scissors', function() {
   describe('#rotate()', function() {
     it('should rotate the selected pages', function() {
       var testfile = new Testfile('rotate');
-      return promisify(scissors(pdf)
-      .range(1,3)
-      .rotate(90)
-      .pdfStream().pipe(fs.createWriteStream(testfile.getPath())))
+      return promisify(
+        scissors(pdf)
+        .range(1,3)
+        .rotate(90)
+        .pdfStream().pipe(fs.createWriteStream(testfile.getPath()))
+      )
       .then(function(){
         testfile.assertExists();
         testfile.remove();
@@ -130,10 +169,12 @@ describe('Scissors', function() {
   describe('#compress()', function() {
     it('should compress the selected pages', function() {
       var testfile = new Testfile('compress');
-      return promisify(scissors(pdf)
-      .compress()
-      .pdfStream()
-      .pipe(fs.createWriteStream(testfile.getPath())))
+      return promisify(
+        scissors(pdf)
+        .compress()
+        .pdfStream()
+        .pipe(fs.createWriteStream(testfile.getPath()))
+      )
       .then(function(){
         testfile.assertExists();
         testfile.remove();

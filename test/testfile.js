@@ -1,17 +1,19 @@
 /** @module test.testfile */
 
 var fs = require('fs');
-var assert = require('assert');
+var assert = require('assert-diff');
 var scissors = require('../scissors');
 
 /**
  * Represents a test result file
  * @class
  * @param  {String} name Name of the test (will be used as filename)
- * @param  {String} ext  (optional) file extension (without dot). Defaults to "pdf"
+ * @param  {String} ext  (optional) file extension (without dot). Defaults to 'pdf'
  * @return {Testfile} An instance of this class
  */
 var Testfile = function(name,ext){
+  this.name = name;
+  this.ext = ext; 
   this.path = __dirname + '/test_results/' + name + '.' + (ext||'pdf');
   this.remove();
 };
@@ -34,18 +36,40 @@ Testfile.prototype.assertExists = function(){
 };
 
 /**
- * Throws an assertion error if file does not have the specified number of pages
+ * Throws an error if file does not have the specified number of pages
  * @return {Promise}
  */
 Testfile.prototype.assertHasLength = function(length){
-  scissors(this.getPath())
+  return scissors(this.getPath())
   .getNumPages()
   .then(function(computedLength){
-    assert.equal(computedLength,length,'Page number does not match. Expected:' + length + ', got' + computedLength);
+    assert.equal(computedLength,length,'Page number does not match.');
   })
   .catch(function(err){
     throw err;
   });
+};
+
+/**
+ * Compares with a reference result and throws an error if file is not the same
+ * @return {void}
+ */
+Testfile.prototype.compareWithReferenceFile = function(){
+  var content = fs.readFileSync(this.getPath(),'utf-8');
+  var referenceFile    = __dirname + '/test_data/' + this.name + '.' + this.ext;
+  var referenceContent =  fs.readFileSync(referenceFile);
+  if( this.ext == 'json'){
+    content = JSON.parse(content);
+    referenceContent = JSON.parse(referenceContent);
+    assert.deepEqual(content, referenceContent, 'Output does not match reference content');
+  } else {
+    for( var i=0; i++; i<Math.min(content.length, referenceContent.length) ){
+      if( content[i] !== referenceContent[i]){
+        break;
+      }
+    }
+    assert.equal(content, referenceContent, 'Output does not match reference content near "' + content.substr(i,20)+'"' );  
+  }
 };
 
 /**
