@@ -12,12 +12,13 @@
   },
   "scripts": {
     "test": "mocha",
-    "prepare" : "./node_modules/.bin/jsdoc scissors.js ./README.md -d doc",
-    "doc" : "./node_modules/.bin/jsdoc scissors.js ./README.md -d doc"
+    "prepare": "./node_modules/.bin/jsdoc scissors.js ./README.md -d doc",
+    "doc": "./node_modules/.bin/jsdoc scissors.js ./README.md -d doc"
   },
   "devDependencies": {
-    "mocha": "^3.4.1",
+    "assert-diff": "^1.2.0",
     "jsdoc": "^3.4.3",
+    "mocha": "^3.4.1",
     "stream-to-promise": "^2.2.0"
   },
   "repository": {
