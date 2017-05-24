@@ -511,7 +511,7 @@ Command.prototype.extractImageStream = function (i) {
 };
 
 /**
- * Returns a stream of property data
+ * Returns a stream of property data, in UTF-8 encoding
  * @return {Stream}
  */
 Command.prototype.propertyStream = function () {
@@ -534,7 +534,7 @@ Command.prototype.propertyStream = function () {
   var cmd = this._copy();
   var property_stream = cmd._push([
     'pdftk', cmd._input(),
-    'dumpdata',
+    'dump_data_utf8',
     'output', '-'
   ])._exec().pipe(stream);
 
