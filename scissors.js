@@ -268,6 +268,7 @@ Command.prototype.repair = function () {
  * Crops the input to a box defined by two x-y coordinates (left bottom / 
  * right top) in pt (72 points == 1 inch == 25.4 millimeters, 1mm = 2,8pt),
  * measured from the bottom left (coordinates 0,0).
+ * Doesn't work with all PDFs yet, see // https://github.com/tcr/scissors/issues/21
  *
  * @param  {number} l Left x coordinate in pt
  * @param  {number} b Bottom y coordinate in pt

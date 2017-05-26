@@ -18,11 +18,11 @@ function debug () {
 function repairPDF (outs) {
 	var pdftk = spawn('pdftk', ['-', 'output', '-']);
 	pdftk.stderr.on('data', function (data) {
-	  console.error('pdftk encountered an error:\n', String(data));
+	  throw new Error('pdftk encountered an error:\n', String(data));
 	});
 	pdftk.on('exit', function (code) {
 		if (code) {
-	  	console.error('pdftk exited with failure code:', code);
+	  	throw new Error('pdftk exited with failure code:', code);
 	  }
 	});
 	pdftk.stdout.pipe(outs);
@@ -72,11 +72,11 @@ function writeCropbox (ins, cropbox) {
 	  '-f', '-']);
 	ins.pipe(gs.stdin);
 	gs.stderr.on('data', function (data) {
-	  debug('gs encountered an error:\n', String(data));
+	  throw new Error('gs encountered an error:\n', String(data));
 	});
 	gs.on('exit', function (code) {
 		if (code) {
-	  	console.error('gs exited with failure code:', code);
+	  	throw new Error('gs exited with failure code:', code);
 	  }
 	  debug('Scissors: Finished writing cropbox.');
 	});
@@ -86,7 +86,7 @@ function writeCropbox (ins, cropbox) {
 //stripCropbox(process.stdin, fs)
 
 if (process.argv.length < 6) {
-	console.error('Invalid number of arguments.');
+	throw new Error('Invalid number of arguments.');
 	process.exit(1);
 }
 
@@ -99,7 +99,7 @@ temp.open('stripCropbox', function (err, info) {
 		debug('Scissors: closed.');
 		stripCropbox(process.stdin, fs.createWriteStream(info.path), function (err, cropbox) {
 			if (err) {
-				return console.error(err);
+				throw new Error(err);
 			}
 			//fs.createReadStream(info.path).pipe(process.stdout);
 			writeCropbox(fs.createReadStream(info.path), combineCropboxes(cropbox, modcropbox))
