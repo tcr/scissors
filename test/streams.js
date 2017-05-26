@@ -70,12 +70,12 @@ describe('Scissors', function() {
   describe('#propertyStream()', function() {
     it('should stream json data with metadata about the PDF', function(done) {
       var testfile = new Testfile('propertystream','json');
-      var result = {};
+      var result = [];
       scissors(pdf)
       .propertyStream()
       .on('data',function(data){
         if( data.value ){
-          result[data.event] = data.value;
+          result.push(data);
         }
       })
       .on('end', function(){

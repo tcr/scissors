@@ -1,7 +1,94 @@
-{
-  "PdfID0": 6962940,
-  "PdfID1": 6962940,
-  "NumberOfPages": 10,
-  "PageMediaNumber": 10,
-  "PageMediaDimensions": 595
-}
+[
+  {
+    "event": "PdfID0",
+    "value": 6962940
+  },
+  {
+    "event": "PdfID1",
+    "value": 6962940
+  },
+  {
+    "event": "NumberOfPages",
+    "value": 10
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 1
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 2
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 3
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 4
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 5
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 6
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 7
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 8
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 9
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  },
+  {
+    "event": "PageMediaNumber",
+    "value": 10
+  },
+  {
+    "event": "PageMediaDimensions",
+    "value": 595
+  }
+]
