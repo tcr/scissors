@@ -13,7 +13,7 @@ var scissors = require('../scissors');
  */
 var Testfile = function(name,ext){
   this.name = name;
-  this.ext = ext; 
+  this.ext = ext||'tmp'; 
   this.path = __dirname + '/test_results/' + name + '.' + (ext||'pdf');
   this.remove();
 };
@@ -28,11 +28,21 @@ Testfile.prototype.getPath = function(){
 
 /**
  * Throws an assertion error if file does not exist or is of size 0
- * @return {void}
+ * @return {Testfile} The testfile instance
  */
 Testfile.prototype.assertExists = function(){
   assert.equal(true,fs.existsSync(this.getPath()), 'File does not exist');
   assert.equal(true,fs.statSync(this.getPath()).size > 0, 'File size is 0');
+  return this;
+};
+
+/**
+ * write data to file as JSON
+ * @return {Testfile} The testfile instance
+ */
+Testfile.prototype.writeJSON = function(data){
+  fs.writeFileSync(this.getPath(),JSON.stringify(data,null,2),'utf-8');
+  return this;
 };
 
 /**
@@ -52,7 +62,7 @@ Testfile.prototype.assertHasLength = function(length){
 
 /**
  * Compares with a reference result and throws an error if file is not the same
- * @return {void}
+ * @return {Testfile} The testfile instance
  */
 Testfile.prototype.compareWithReferenceFile = function(){
   var content = fs.readFileSync(this.getPath(),'utf-8');
@@ -70,6 +80,7 @@ Testfile.prototype.compareWithReferenceFile = function(){
     }
     assert.equal(content, referenceContent, 'Output does not match reference content near "' + content.substr(i,20)+'"' );  
   }
+  return this;
 };
 
 /**
