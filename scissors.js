@@ -610,7 +610,8 @@ Command.prototype.getNumPages = function() {
  * Returns an array of objects containing the dimension of the page, in pt
  * requires the imagemagick package, containing the `identify` command line 
  * utility
- * @return {Promise}
+ * @return {Promise} Promise that resolves with an array of objects, each 
+ * containing the properties 'width', 'height' and 'unit' unit being 'pt'.
  */
 Command.prototype.getPageSizes = function() {
   var self = this;
