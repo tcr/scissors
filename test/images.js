@@ -9,7 +9,7 @@ describe('Scissors', function() {
 
   this.timeout(50000);
 
-  return; // skip time-consuming image tests
+  //return; // skip time-consuming image tests
   describe('#jpgStream() - slow rasterize', function() {
     it('should extract a single jpg page (using default rasterize)', function(done) {
       var testfile = new Testfile('page1_default','jpg');
@@ -109,7 +109,8 @@ describe('Scissors', function() {
       var useSimpleRasterize = true;
       var useCropBox = true;
       scissors(pdf)
-      .pngStream(dpi, pageNum, useSimpleRasterize, useCropBox).pipe(fs.createWriteStream(testfile.getPath()))
+      .pngStream(dpi, pageNum, useSimpleRasterize, useCropBox)
+      .pipe(fs.createWriteStream(testfile.getPath()))
       .on('finish', function(){
         testfile.assertExists();
         testfile.remove();
@@ -120,6 +121,19 @@ describe('Scissors', function() {
     });
   });
 
-  // TODO: extractImageStream()
-
+  describe('#extractImageStream()', function() {
+    it('should extract a single image from the pdf (only checks file creation)', function(done) {
+      var testfile = new Testfile('image0','jpg');
+      scissors(pdf)
+      .extractImageStream(0)
+      .pipe(fs.createWriteStream(testfile.getPath()))
+      .on('finish', function(){
+        testfile.assertExists();
+        testfile.remove();
+        done();
+      }).on('error',function(err){
+        throw err;
+      });
+    });
+  });
 });

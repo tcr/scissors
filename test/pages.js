@@ -203,7 +203,7 @@ describe('Scissors', function() {
 
   // crop
   describe('#crop()', function() {
-    it('should crop the selected pages', function() {
+    it('should crop the selected pages (checks only execution, not result)', function() {
       var testfile = new Testfile('crop');
       return promisify(
         scissors(pdf)
