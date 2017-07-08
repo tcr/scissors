@@ -66,7 +66,9 @@ function proxyStream (a, b) {
  * Constructor of Command instance
  * @inner
  * @constructor
- * @param {mixed} input
+ * @param {mixed} input Should be either a filename (string) or a pipe. If it's 
+ * a pipe, this.stream is set to that value, otherwise null.
+
  * @param {Boolean} ready Whether the command has been fully executed
  */
 function Command (input, ready) {
@@ -109,8 +111,8 @@ Command.prototype._push = function (command) {
 }
 
 /**
- * Returns the input value, which is either a string with the path to the
- * input file, or a Command instance (?)
+ * Returns what the command line expects to receive,  i.e. either the filename
+ * or - (i.e. stdin)
  * @return {string}
  */
 Command.prototype._input = function () {
@@ -469,13 +471,17 @@ Command.prototype.textStream = function () {
 };
 
 /**
- * Returns a stream of image data, via the `pdfimages` command
+ * Returns a stream of image data, via the `pdfimages` command (called with `-j`).
+ * The output format cannot be guaranteed. As per pdfimages documentation
+ * (http://linuxcommand.org/man_pages/pdfimages1.html),  images in DCT format 
+ * are  saved  as  JPEG  format. All  non-DCT images are saved are written as PBM 
+ * (for monochrome  images) or  PPM  (for non-monochrome  images) files. 
+ * NOTE: The current implementation is pretty costly and is dependent on an additional
+ * dependency (pdfimages). Preferrably, this would be done in Ghostscript.
  * @param  {Number=} [0] i The number of the image to be extracted, defaults to 0.
- * @return {Stream}
+ * @return {Stream} Stream of image data in PPM, PBM or JPG format
  */
 Command.prototype.extractImageStream = function (i) {
-  // NOTE: This is pretty costly and uses another dependency.
-  // Preferrably, this would be done in Ghostscript.
   i = i || 0;
   var stream = new Stream();
   if (!this._pdfimages) {
@@ -556,6 +562,10 @@ Command.prototype.propertyStream = function () {
  */
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
+  // Note: this.stream is either a pipe or null. If it's a pipe, it's piped into the 
+  // object as stdin. (Otherwise the command would receive no stdin) And _input 
+  // is used as the input argument to the command, either the filename or - to 
+  // mean stdin, accordingly.
   var initialValue = this.stream;
   this.onready(function () {
     // use result of one command as input for next command
@@ -607,8 +617,8 @@ Command.prototype.getNumPages = function() {
 };
 
 /**
- * Returns an array of objects containing the dimension of the page, in pt
- * requires the imagemagick package, containing the `identify` command line 
+ * Returns an array of objects containing the dimension of the page.
+ * Requires the imagemagick package, containing the `identify` command line 
  * utility
  * @return {Promise} Promise that resolves with an array of objects, each 
  * containing the properties 'width', 'height' and 'unit' unit being 'pt'.
