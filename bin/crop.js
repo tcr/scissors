@@ -7,8 +7,9 @@ var temp = require('temp');
 require('bufferjs/indexOf');
 
 // take stdin, write to random access file
-// strip cropbox
-// then reapply cropbox and write to stdout
+// strip cropbox tthen reapply cropbox and write to stdout
+// doesn't work with all PDFs yet, see
+// https://github.com/tcr/scissors/issues/21
 // http://stackoverflow.com/questions/6183479/cropping-a-pdf-using-ghostscript-9-01?rq=1
 
 function debug () {
