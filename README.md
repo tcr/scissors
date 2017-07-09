@@ -46,7 +46,8 @@ require('stream-to-promise')(
 });
 
 pdf.pngStream(300).pipe(fs.createWriteStream('out-page1.png')); // PNG of first page at 300 dpi
-pdf.textStream().pipe(process.stdout) // Individual text strings
+pdf.textStream().pipe(process.stdout) // Stream of individual text strings
+pdf.propertyStream().pipe(process.stdout) // Stream of PDF meta data
 
 // Extract content as text or images:
 pdf.contentStream().on('data', console.log)
@@ -60,6 +61,18 @@ pdf.contentStream().on('data', console.log)
 // Calls `pdfimages -j`, so the result format is dependent on the 
 // format of the embedded image (see http://linuxcommand.org/man_pages/pdfimages1.html)
 pdf.extractImageStream(0).pipe(s.createWriteStream('firstImage.jpg'));
+
+// Promise-based output:
+pdf.getPageSizes().getPageSizes().then(console.dir);
+// [
+//  {
+//    "width": "595",
+//    "height": "842",
+//    "unit": "pt"
+//  },
+//  ...
+pdf.getNumPages().then(console.log); // prints the number of pages of the PDF
+
 ```
 
 ## Requirements
@@ -67,8 +80,10 @@ pdf.extractImageStream(0).pipe(s.createWriteStream('firstImage.jpg'));
 Scissors is a wrapper around command line utilities (mainly PDFTK) that have to 
 be separately installed.
 
-* Install [PDFTK (http://www.pdflabs.com/docs/install-pdftk/)](http://www.pdflabs.com/docs/install-pdftk/) on your system.
-* Mac OS >=10.11 requires a patched build available [here](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg) as per [this thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
+* Install [PDFTK](http://www.pdflabs.com/docs/install-pdftk/) 
+  on your system. Mac OS >=10.11 requires a patched build available 
+  [here](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg) 
+  as per [this thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
 * Ensure you have Ghostscript installed (check by running `gs --version`).
 * *(optional)* To extract individual images from a page with the 
   `extractImageStream()` method, install `pdfimages` with `brew install xpdf` or 
