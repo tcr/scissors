@@ -1,10 +1,7 @@
 # scissors
 
-PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, stick them in a stew.
-
-NOTICE: This utility is currently being overhauled. We are merging updates from
-various forks and are adding tests. During this time, the code might be unstable
-or not work at all. Please bear with us.
+PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, 
+stick them in a stew.
 
 ## Example
 
@@ -15,19 +12,39 @@ var scissors = require('scissors');
 var pdf = scissors('in.pdf')
    .pages(4, 5, 6, 1, 12) // select or reorder individual pages
    .range(1, 10) // pages 1-10
-   .even() // select even pages
-   .odd() // select odd pages
-   .rotate(90) // 90, 180, 270, 360
-   .compress()
-   .uncompress()
-   .crop(100, 100, 300, 200) // offset in points from left, bottom, right, top
-
+   .even() // select even pages, 
+   .odd() // or odd, 
+   .rotate(90) // 90, 180, 270, 360 degrees
+   .reverse() // reverse the page order
+   .crop(100, 100, 300, 200) // offset in points from left, bottom, right, top (doesn't work reliably yet)
+   .pdfStream()... // see below
+   
 // Join multiple files...
 var pdfA = scissors('1.pdf'), pdfB = scissors('2.pdf'), pdfC = scissors('3.pdf')
-scissors.join(pdfA.page(1), pdfB, pdfC.pages(5, 10)).deflate().pdfStream()...
+scissors.join(pdfA.page(1), pdfB, pdfC.pages(5, 10)).pdfStream()...
 
 // And output data as streams.
-pdf.pdfStream().pipe(fs.createWriteStream('out.pdf')); // PDF of compiled output
+pdf.pdfStream()
+   .pipe(fs.createWriteStream('out.pdf'))
+   .on('finish', function(){
+     console.log("We're done!");
+   }).on('error',function(err){
+     throw err;
+   });
+
+// or use promises:
+require('stream-to-promise')(
+  scissors(pdf)
+  .pages(1,3)
+  .pdfStream().pipe(fs.createWriteStream(testfile.getPath()))
+)
+.then(function(){
+   console.log("We're done!");
+})
+.catch(function(e){
+   console.error("Something went wrong:" + e);
+});
+
 pdf.pngStream(300).pipe(fs.createWriteStream('out-page1.png')); // PNG of first page at 300 dpi
 pdf.textStream().pipe(process.stdout) // Individual text strings
 
@@ -40,12 +57,25 @@ pdf.contentStream().on('data', console.log)
 // { type: 'image', x: 3049, y: 5680, width: 655, height: 810, index: 4 }
 
 // Use the 'index' property of an image element to extract an image:
-pdf.extractImageStream(0)
+// Calls `pdfimages -j`, so the result format is dependent on the 
+// format of the embedded image (see http://linuxcommand.org/man_pages/pdfimages1.html)
+pdf.extractImageStream(0).pipe(s.createWriteStream('firstImage.jpg'));
 ```
 
 ## Requirements
 
+Scissors is a wrapper around command line utilities (mainly PDFTK) that have to 
+be separately installed.
+
 * Install [PDFTK (http://www.pdflabs.com/docs/install-pdftk/)](http://www.pdflabs.com/docs/install-pdftk/) on your system.
-* Mac OS 10.11 requires a patched build available [here] (https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg) as per [this thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
+* Mac OS >=10.11 requires a patched build available [here](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg) as per [this thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
 * Ensure you have Ghostscript installed (check by running `gs --version`).
-* *(optional)* To extract individual images from a page, install `pdfimages` with `brew install xpdf` or `apt-get install poppler-utils`.
+* *(optional)* To extract individual images from a page with the 
+  `extractImageStream()` method, install `pdfimages` with `brew install xpdf` or 
+   `apt-get install poppler-utils`.
+
+## Dev resources
+- https://www.pdflabs.com/docs/pdftk-man-page/
+
+## Known issues
+- `.crop()` doesn't work reliably, if at all.
