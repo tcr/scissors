@@ -1,6 +1,6 @@
 {
   "name": "scissors",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "PDF manipulation in Node.js, based on PDFTK.",
   "main": "scissors.js",
   "dependencies": {
