@@ -139,7 +139,7 @@ Command.prototype.range = function (min, max) {
   var cmd = this._copy();
   return cmd._push([
     'pdftk', cmd._input(),
-    'cat', min + (max ? '-' + max : ''),
+    'cat', min + (max ? '-' + max : '-end'),
     'output', '-'
     ]);
 };
