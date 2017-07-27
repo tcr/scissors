@@ -1,7 +1,7 @@
 # scissors
 
-PDF manipulation in Node.js! Split, join, crop, read, extract, boil, mash, 
-stick them in a stew.
+PDF manipulation in Node.js, based on PDFTK! Split, join, crop, read, extract, 
+boil, mash, stick them in a stew.
 
 ## Example
 
@@ -17,13 +17,13 @@ var pdf = scissors('in.pdf')
    .rotate(90) // 90, 180, 270, 360 degrees
    .reverse() // reverse the page order
    .crop(100, 100, 300, 200) // offset in points from left, bottom, right, top (doesn't work reliably yet)
-   .pdfStream()... // see below
+   .pdfStream()... // output stream, see below
    
 // Join multiple files...
 var pdfA = scissors('1.pdf'), pdfB = scissors('2.pdf'), pdfC = scissors('3.pdf')
 scissors.join(pdfA.page(1), pdfB, pdfC.pages(5, 10)).pdfStream()...
 
-// And output data as streams.
+// And output data as streams
 pdf.pdfStream()
    .pipe(fs.createWriteStream('out.pdf'))
    .on('finish', function(){
@@ -36,7 +36,7 @@ pdf.pdfStream()
 require('stream-to-promise')(
   scissors(pdf)
   .pages(1,3)
-  .pdfStream().pipe(fs.createWriteStream(testfile.getPath()))
+  .pdfStream().pipe(fs.createWriteStream(...)
 )
 .then(function(){
    console.log("We're done!");
@@ -63,7 +63,7 @@ pdf.contentStream().on('data', console.log)
 pdf.extractImageStream(0).pipe(s.createWriteStream('firstImage.jpg'));
 
 // Promise-based output:
-pdf.getPageSizes().getPageSizes().then(console.dir);
+pdf.getPageSizes().then(console.dir);
 // [
 //  {
 //    "width": "595",
