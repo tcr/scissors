@@ -152,10 +152,10 @@ describe('Scissors', function() {
           );
         })
       )
-      .then(function(length){
+      .then(function(){
         files.forEach(function(file){ 
           file.assertExists();
-          //file.remove();
+          file.remove();
         });
       })
       .catch(function (err) {
