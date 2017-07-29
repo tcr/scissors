@@ -2,7 +2,8 @@
 var scissors = require('../scissors');
 var fs = require('fs');
 var Testfile = require('./testfile');
-
+var Promise = require('any-promise');
+var promisify = require('stream-to-promise');
 var pdf = __dirname + '/test_data/test.pdf';
 
 describe('Scissors', function() {
@@ -132,6 +133,32 @@ describe('Scissors', function() {
         testfile.remove();
         done();
       }).on('error',function(err){
+        throw err;
+      });
+    });
+  });
+  
+  describe('Save several pages as images', function() {
+    it('should save a range of pages as png images', function() {
+      var files = [];
+      return Promise.all(
+        [1,2,3].map(function(page){
+          var file = new Testfile('page_'+page,'png');
+          files.push(file);
+          return promisify(
+            scissors(pdf)
+            .pngStream(300,page,true)
+            .pipe(fs.createWriteStream(file.getPath()))
+          );
+        })
+      )
+      .then(function(length){
+        files.forEach(function(file){ 
+          file.assertExists();
+          //file.remove();
+        });
+      })
+      .catch(function (err) {
         throw err;
       });
     });
