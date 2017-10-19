@@ -63,7 +63,7 @@ pdf.contentStream().on('data', console.log)
 pdf.extractImageStream(0).pipe(s.createWriteStream('firstImage.jpg'));
 
 // Promise-based output:
-pdf.getPageSizes().then(console.dir);
+pdf.getPageSizes().then(console.dir); // requires imagemagick
 // [
 //  {
 //    "width": "595",
@@ -85,6 +85,7 @@ be separately installed.
   [here](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg) 
   as per [this thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
 * Ensure you have Ghostscript installed (check by running `gs --version`).
+* To use the `getPageSizes` method, you need the imagemagick library, which provides the `identify` executable.
 * *(optional)* To extract individual images from a page with the 
   `extractImageStream()` method, install `pdfimages` with `brew install xpdf` or 
    `apt-get install poppler-utils`.
