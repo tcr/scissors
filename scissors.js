@@ -562,6 +562,11 @@ Command.prototype.propertyStream = function () {
  */
 Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
+    
+  stream.on('error', function (err) {
+    console.log(err);
+  })
+    
   // Note: this.stream is either a pipe or null. If it's a pipe, it's piped into the 
   // object as stdin. (Otherwise the command would receive no stdin) And _input 
   // is used as the input argument to the command, either the filename or - to 
