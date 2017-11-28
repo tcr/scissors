@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "assert-diff": "^1.2.0",
-    "mocha": "^3.4.1",
+    "mocha": "^3.5.3",
     "stream-to-promise": "^2.2.0"
   },
   "repository": {

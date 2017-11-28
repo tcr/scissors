@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - 6
+  - 8
+install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y pdftk ghostscript imagemagick poppler-utils
+script:
+  - npm test
+
