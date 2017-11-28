@@ -564,7 +564,7 @@ Command.prototype._exec = function () {
   var stream = new Stream(), commands = this.commands.slice();
     
   stream.on('error', function (err) {
-    console.log(err);
+    console.error(err.message);
   })
     
   // Note: this.stream is either a pipe or null. If it's a pipe, it's piped into the 
