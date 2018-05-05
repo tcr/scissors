@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var spawn = require('child_process').spawn;
+var rimraf = require('rimraf').sync;
 
 var temp = require('temp');
 require('bufferjs/indexOf');
@@ -100,10 +101,17 @@ temp.open('stripCropbox', function (err, info) {
 		debug('Scissors: closed.');
 		stripCropbox(process.stdin, fs.createWriteStream(info.path), function (err, cropbox) {
 			if (err) {
+				rimraf(info.path);
 				throw new Error(err);
 			}
+			var stream = fs.createReadStream(info.path);
+			stream.on('close', function () {
+				rimraf(info.path);
+			}).on('error', function () {
+				rimraf(info.path);
+			});
 			//fs.createReadStream(info.path).pipe(process.stdout);
-			writeCropbox(fs.createReadStream(info.path), combineCropboxes(cropbox, modcropbox))
+			writeCropbox(stream, combineCropboxes(cropbox, modcropbox))
 				.pipe(process.stdout);
 		});
 		process.stdin.resume();
