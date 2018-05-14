@@ -2,6 +2,7 @@
 
 var fs = require('fs');
 var spawn = require('child_process').spawn;
+var rimraf = require('rimraf').sync;
 
 var temp = require('temp');
 require('bufferjs/indexOf');
@@ -99,9 +100,16 @@ createTempFile(function (path) {
 	var inputStream = input == '-' ? process.stdin : fs.createReadStream(input);
 	readBoundingBox(inputStream, page, function (err, boundingbox) {
 		if (err) {
+			rimraf(path);
 			return console.error(err);
 		}
-		rasterizeImage(fs.createReadStream(path), page, dpi, format, boundingbox)
+		var stream = fs.createReadStream(path);
+		stream.on('close', function () {
+			rimraf(path);
+		}).on('error', function () {
+			rimraf(path);
+		});
+		rasterizeImage(stream, page, dpi, format, boundingbox)
 			.pipe(process.stdout);
 	});
 	inputStream.resume();

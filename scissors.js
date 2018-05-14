@@ -11,6 +11,7 @@ var BufferStream = require('bufferstream');
 var temp = require('temp').track();
 var async = require('async');
 var Promise = require('any-promise');
+var rimraf = require('rimraf').sync;
 
 /*
     Internal functions
@@ -122,6 +123,17 @@ Command.prototype._input = function () {
   } catch (e) {
     return this.input;
   }
+};
+
+/**
+ * Marks a folder to be deleted on cleanup
+ * @param  {String} folder
+ * @return {Command} A chainable Command instance
+ */
+Command.prototype._markCleanupFolder = function (folder) {
+  this._cleanupFolders = this._cleanupFolders || [];
+  this._cleanupFolders.push(folder);
+  return this;
 };
 
 /*
@@ -487,8 +499,12 @@ Command.prototype.extractImageStream = function (i) {
   if (!this._pdfimages) {
     var callback = this._pdfimages = promise();
     temp.mkdir('pdfimages', function (err, dirPath) {
+      this._markCleanupFolder(dirPath);
       this.pdfStream()
         .pipe(fs.createWriteStream(path.join(dirPath, 'file.pdf')))
+        .on('error', function () {
+          callback.deliver([]);
+        })
         .on('close', function () {
           var prog = spawn('pdfimages', ['-j', dirPath + '/file.pdf', dirPath + '/A']);
           prog.stderr.on('data', function (data) {
@@ -622,6 +638,20 @@ Command.prototype.getNumPages = function() {
 };
 
 /**
+ * Cleans all temporary folders created during usage.
+ * Use this method if your process is running for a long time
+ * and you want to clean up temporary folders.
+ */
+Command.prototype.cleanup = function() {
+  if (this._cleanupFolders) {
+    this._cleanupFolders.forEach(function (dir) {
+      rimraf(dir)
+    });
+    this._cleanupFolders = [];
+  }
+};
+
+/**
  * Returns an array of objects containing the dimension of the page.
  * Requires the imagemagick package, containing the `identify` command line 
  * utility
@@ -648,6 +678,7 @@ Command.prototype.getPageSizes = function() {
     			  result+=data.toString();
     			});
     			identify.on('exit', function (code) {
+    				rimraf(info.path);
     				if (code) {
     			  	throw new Error('identify exited with failure code:', code);
     			  }
@@ -667,6 +698,7 @@ Command.prototype.getPageSizes = function() {
     			});    			
         })
         .on('error',function(err){
+          rimraf(info.path);
           reject(err);
         })
       });
@@ -695,6 +727,7 @@ scissors.join = function () {
 
   var outfile = joinTemp + '/' + (joinindex++) + '.pdf';
   var pdf = new Command(outfile, false);
+  pdf._markCleanupFolder(joinTemp);
 
   async.map(args, function (arg, next) {
     var file = joinTemp + '/' + (joinindex++) + '.pdf';
