@@ -4,6 +4,8 @@
 PDF manipulation in Node.js, based on PDFTK! Split, join, crop, read, extract, 
 boil, mash, stick them in a stew.
 
+**This project is no longer actively maintained and we cannot respond to issues. Consider alternatives such as https://github.com/jjwilly16/node-pdftk**
+
 ## Example
 
 ```javascript
