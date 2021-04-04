@@ -1,0 +1,23 @@
+on:
+  - pull_request
+  - push
+
+jobs:
+  run_tests:
+    name: Run Scissors tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install Ubuntu package dependencies
+        run: |
+          sudo apt-get install -y pdftk ghostscript imagemagick poppler-utils
+          npm install --dev
+      - name: Run tests
+        run: npm test
