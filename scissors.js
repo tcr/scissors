@@ -679,40 +679,43 @@ Command.prototype.getPageSizes = function() {
         if (err) reject(err);
         self
         .pdfStream()
-        .pipe(fs.createWriteStream(info.path))
-        .on('finish',function(){
-    			var identify = spawn('identify', [info.path]);
-    			var result ="";
-    			identify.stderr.on('data', function (data) {
-    			  throw new Error('identify encountered an error:\n', String(data));
-    			});
-    			identify.stdout.on('data', function(data){
-    			  result+=data.toString();
-    			});
-    			identify.on('exit', function (code) {
-    				rimraf(info.path);
-    				if (code) {
-    			  	throw new Error('identify exited with failure code:', code);
-    			  }
-    			  dimensions=[];
-    			  var re = /\[([0-9]+)\] PDF ([0-9]+)x([0-9]+)/ig;
-    			  result.split(/\n/).map(function(line){
-    			    var matches = re.exec(line);
-    			    if(matches instanceof Array){
-      			    dimensions.push({
-      			      width : matches[2],
-      			      height : matches[3],
-      			      unit : 'pt'
-      			    });
-    			    }
-    			  });
-    			  resolve(dimensions);
-    			});    			
-        })
-        .on('error',function(err){
-          rimraf(info.path);
-          reject(err);
-        })
+          .on('error', reject)
+          .pipe(fs.createWriteStream(info.path))
+          .on('finish',function(){
+            var identify = spawn('identify', [info.path]);
+            var result ="";
+            identify.stderr.on('data', function (data) {
+              if (data && data.toString().trim()) {
+                throw new Error('identify encountered an error:\n', String(data));
+              }
+            });
+            identify.stdout.on('data', function(data){
+              result+=data.toString();
+            });
+            identify.on('exit', function (code) {
+              rimraf(info.path);
+              if (code) {
+                throw new Error('identify exited with failure code:', code);
+              }
+              dimensions=[];
+              var re = /\[([0-9]+)\] PDF ([0-9]+)x([0-9]+)/ig;
+              result.split(/\n/).map(function(line){
+                var matches = re.exec(line);
+                if(matches instanceof Array){
+                  dimensions.push({
+                    width : matches[2],
+                    height : matches[3],
+                    unit : 'pt'
+                  });
+                }
+              });
+              resolve(dimensions);
+            });
+          })
+          .on('error',function(err){
+            rimraf(info.path);
+            reject(err);
+          });
       });
     });
   });
