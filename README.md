@@ -1,5 +1,5 @@
 # scissors
-[![Build Status](https://travis-ci.org/tcr/scissors.svg?branch=master)](https://travis-ci.org/tcr/scissors)
+[![.github/workflows/run_tests.yml](https://github.com/tcr/scissors/actions/workflows/run_tests.yml/badge.svg)](https://github.com/tcr/scissors/actions/workflows/run_tests.yml)
 
 PDF manipulation in Node.js, based on PDFTK! Split, join, crop, read, extract, 
 boil, mash, stick them in a stew.
