@@ -50,14 +50,14 @@ Testfile.prototype.writeJSON = function(data){
  * @return {Promise}
  */
 Testfile.prototype.assertHasLength = function(length){
-  return scissors(this.getPath())
-  .getNumPages()
-  .then(function(computedLength){
-    assert.equal(computedLength,length,'Page number does not match.');
-  })
-  .catch(function(err){
-    throw err;
-  });
+  return scissors(fs.createReadStream(this.getPath()))
+    .getNumPages()
+    .then(function(computedLength){
+      assert.equal(computedLength,length,'Page number does not match.');
+    })
+    .catch(function(err){
+      throw err;
+    });
 };
 
 /**

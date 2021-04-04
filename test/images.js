@@ -4,9 +4,9 @@ var fs = require('fs');
 var Testfile = require('./testfile');
 var Promise = require('any-promise');
 var promisify = require('stream-to-promise');
-var pdf = __dirname + '/test_data/test.pdf';
+var pdf = () => fs.createReadStream(__dirname + '/test_data/test.pdf');
 
-describe('Scissors', function() {
+describe('Test Scissors image extraction methods', function() {
 
   this.timeout(50000);
 
@@ -17,15 +17,14 @@ describe('Scissors', function() {
       var dpi = 300;
       var pageNum = 1;
       var useSimpleRasterize = false;
-      scissors(pdf)
-      .jpgStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
-      .on('finish', function(){
-        testfile.assertExists();
-        testfile.remove();
-        done();
-      }).on('error',function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .jpgStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
+        .on('error', err => {throw err;})
+        .on('finish', function(){
+          testfile.assertExists();
+          testfile.remove();
+          done();
+        });
     });
   });
 
@@ -35,15 +34,14 @@ describe('Scissors', function() {
       var dpi = 300;
       var pageNum = 1;
       var useSimpleRasterize = false;
-      scissors(pdf)
-      .pngStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
-      .on('finish', function(){
-        testfile.assertExists();
-        testfile.remove();
-        done();
-      }).on('error',function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .pngStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
+        .on('error', err => {throw err;})
+        .on('finish', function(){
+          testfile.assertExists();
+          testfile.remove();
+          done();
+        });
     });
   });
 
@@ -53,15 +51,14 @@ describe('Scissors', function() {
       var dpi = 300;
       var pageNum = 1;
       var useSimpleRasterize = true;
-      scissors(pdf)
-      .jpgStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
-      .on('finish', function(){
-        testfile.assertExists();
-        testfile.remove();
-        done();
-      }).on('error',function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .jpgStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
+        .on('error', err => {throw err;})
+        .on('finish', function(){
+          testfile.assertExists();
+          testfile.remove();
+          done();
+        });
     });
   });
 
@@ -71,15 +68,14 @@ describe('Scissors', function() {
       var dpi = 300;
       var pageNum = 1;
       var useSimpleRasterize = true;
-      scissors(pdf)
-      .pngStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
-      .on('finish', function(){
-        testfile.assertExists();
-        testfile.remove();
-        done();
-      }).on('error',function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .pngStream(dpi, pageNum, useSimpleRasterize).pipe(fs.createWriteStream(testfile.getPath()))
+        .on('error', err => {throw err;})
+        .on('finish', function(){
+          testfile.assertExists();
+          testfile.remove();
+          done();
+        });
     });
   });
 
@@ -90,15 +86,14 @@ describe('Scissors', function() {
       var pageNum = 1;
       var useSimpleRasterize = true;
       var useCropBox = true;
-      scissors(pdf)
-      .jpgStream(dpi, pageNum, useSimpleRasterize, useCropBox).pipe(fs.createWriteStream(testfile.getPath()))
-      .on('finish', function(){
-        testfile.assertExists();
-        testfile.remove();
-        done();
-      }).on('error',function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .jpgStream(dpi, pageNum, useSimpleRasterize, useCropBox).pipe(fs.createWriteStream(testfile.getPath()))
+        .on('error', err => {throw err;})
+        .on('finish', function(){
+          testfile.assertExists();
+          testfile.remove();
+          done();
+        });
     });
   });
 
@@ -109,32 +104,32 @@ describe('Scissors', function() {
       var pageNum = 1;
       var useSimpleRasterize = true;
       var useCropBox = true;
-      scissors(pdf)
-      .pngStream(dpi, pageNum, useSimpleRasterize, useCropBox)
-      .pipe(fs.createWriteStream(testfile.getPath()))
-      .on('finish', function(){
-        testfile.assertExists();
-        testfile.remove();
-        done();
-      }).on('error',function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .pngStream(dpi, pageNum, useSimpleRasterize, useCropBox)
+        .on('error', err => {throw err;})
+        .pipe(fs.createWriteStream(testfile.getPath()))
+        .on('error', err => {throw err;})
+        .on('finish', function(){
+          testfile.assertExists();
+          testfile.remove();
+          done();
+        });
     });
   });
 
   describe('#extractImageStream()', function() {
     it('should extract a single image from the pdf (only checks file creation)', function(done) {
       var testfile = new Testfile('image0','jpg');
-      scissors(pdf)
-      .extractImageStream(0)
-      .pipe(fs.createWriteStream(testfile.getPath()))
-      .on('finish', function(){
-        testfile.assertExists();
-        testfile.remove();
-        done();
-      }).on('error',function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .extractImageStream(0)
+        .on('error', err => {throw err;})
+        .pipe(fs.createWriteStream(testfile.getPath()))
+        .on('error', err => {throw err;})
+        .on('finish', function(){
+          testfile.assertExists();
+          testfile.remove();
+          done();
+        });
     });
   });
   
@@ -146,9 +141,10 @@ describe('Scissors', function() {
           var file = new Testfile('page_'+page,'png');
           files.push(file);
           return promisify(
-            scissors(pdf)
-            .pngStream(300,page,true)
-            .pipe(fs.createWriteStream(file.getPath()))
+            scissors(pdf())
+              .pngStream(300,page,true)
+              .on('error', err => {throw err;})
+              .pipe(fs.createWriteStream(file.getPath()))
           );
         })
       )

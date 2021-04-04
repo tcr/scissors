@@ -5,11 +5,11 @@ var fs = require('fs');
 var util = require('util');
 var Testfile = require('./testfile');
 
-var pdf = __dirname + '/test_data/test.pdf';
+var pdf = () => fs.createReadStream(__dirname + '/test_data/test.pdf');
 
 // TODO: better result checks
 
-describe('Scissors', function() {
+describe('Test Scissor streams', function() {
   this.timeout(20000);
 
 
@@ -19,26 +19,26 @@ describe('Scissors', function() {
     it('should produce a stream with JSON data parsed from the raw PDF data', function(done) {
       var testfile = new Testfile('commandstream','json');
       var result = [];
-      scissors(pdf)
-      .pages(1,3)
-      ._commandStream()
-      .on('data',function(data){
-        result.push(data);
-      })
-      .on('end', function(){
-        if( counter++ == 0 ){
-          fs.writeFileSync(testfile.getPath(), JSON.stringify(result,null,2));
-          testfile.compareWithReferenceFile();
-          testfile.remove();
-          done();          
-        } else {
-          // this addresses a wierd, hard to reproduce error
-          throw new Error('"end" event has been emitted twice!'); 
-        }
-      })
-      .on('error', function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .pages(1,3)
+        ._commandStream()
+        .on('data',function(data){
+          result.push(data);
+        })
+        .on('end', function(){
+          if( counter++ == 0 ){
+            fs.writeFileSync(testfile.getPath(), JSON.stringify(result,null,2));
+            testfile.compareWithReferenceFile();
+            testfile.remove();
+            done();
+          } else {
+            // this addresses a weird, hard to reproduce error
+            throw new Error('"end" event has been emitted twice!');
+          }
+        })
+        .on('error', function(err){
+          throw err;
+        });
     });
   }); 
 
@@ -48,21 +48,21 @@ describe('Scissors', function() {
     it('should output metadata about the PDF', function(done) {
       var testfile = new Testfile('contentstream','json');
       var result = [];
-      scissors(pdf)
-      .pages(1,3)
-      .contentStream()
-      .on('data',function(data){
-        result.push(data);
-      })
-      .on('end', function(){
-        fs.writeFileSync(testfile.getPath(), JSON.stringify(result,null,2));
-        testfile.compareWithReferenceFile();
-        testfile.remove();
-        done();
-      })
-      .on('error', function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .pages(1,3)
+        .contentStream()
+        .on('data',function(data){
+          result.push(data);
+        })
+        .on('end', function(){
+          fs.writeFileSync(testfile.getPath(), JSON.stringify(result,null,2));
+          testfile.compareWithReferenceFile();
+          testfile.remove();
+          done();
+        })
+        .on('error', function(err){
+          throw err;
+        });
     });
   });
   
@@ -71,22 +71,22 @@ describe('Scissors', function() {
     it('should stream json data with metadata about the PDF', function(done) {
       var testfile = new Testfile('propertystream','json');
       var result = [];
-      scissors(pdf)
-      .propertyStream()
-      .on('data',function(data){
-        if( data.value ){
-          result.push(data);
-        }
-      })
-      .on('end', function(){
-        fs.writeFileSync(testfile.getPath(), JSON.stringify(result,null,2));
-        testfile.compareWithReferenceFile();
-        testfile.remove();
-        done();
-      })
-      .on('error', function(err){
-        throw err;
-      });
+      scissors(pdf())
+        .propertyStream()
+        .on('data',function(data){
+          if( data.value ){
+            result.push(data);
+          }
+        })
+        .on('end', function(){
+          fs.writeFileSync(testfile.getPath(), JSON.stringify(result,null,2));
+          testfile.compareWithReferenceFile();
+          testfile.remove();
+          done();
+        })
+        .on('error', function(err){
+          throw err;
+        });
     });
   });
   
@@ -95,9 +95,10 @@ describe('Scissors', function() {
     it('should output text that is contained in the PDF', function() {
       var testfile = new Testfile('textstream','txt');
       return promisify(
-        scissors(pdf).pages(1,3)
-        .textStream()
-        .pipe(fs.createWriteStream(testfile.getPath()))
+        scissors(pdf()).pages(1,3)
+          .textStream()
+          .on('error', e => {throw e;})
+          .pipe(fs.createWriteStream(testfile.getPath()))
       )
       .then(function(){
         testfile.assertExists();
@@ -109,6 +110,5 @@ describe('Scissors', function() {
         throw err;
       });
     });
-  });  
-  
+  });
 });
