@@ -8,15 +8,15 @@
     "async": "^2.4.0",
     "bufferjs": "^3.0.1",
     "bufferstream": "^0.6.2",
-    "temp": "^0.8.1",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.2",
+    "temp": "^0.8.1"
   },
   "scripts": {
     "test": "mocha"
   },
   "devDependencies": {
     "assert-diff": "^1.2.0",
-    "mocha": "^3.5.3",
+    "mocha": "^8.3.2",
     "stream-to-promise": "^2.2.0"
   },
   "repository": {
