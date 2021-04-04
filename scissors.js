@@ -391,12 +391,20 @@ Command.prototype._commandStream = function () {
     '-dCOMPLEX', path.join(__dirname, 'contrib/ps2ascii.ps'),
     '-', '-c', 'quit']);
   this.pdfStream().pipe(gs.stdin);
-  gs.stdout.pipe(stream);
+  var end = false;
+  gs.stdout
+    .pipe(stream)
+    .on('end', function(){
+      end = true;
+    })
   gs.stderr.on('data', function (data) {
     console.error('gs encountered an error:\n', String(data));
   });
   gs.on('exit', function (/*code*/) {
-    stream.emit('end');
+    if (!end) {
+      end = true;
+      stream.emit('end');
+    }
   });
   return stream;
 };
@@ -407,7 +415,7 @@ Command.prototype._commandStream = function () {
  */
 Command.prototype.contentStream = function () {
   function isNextStringPartOfLastString (b, a, font) {
-    // NOTE: This is a completely arbitrary hueristic.
+    // NOTE: This is a completely arbitrary heuristic.
     // I wouldn't trust it to not break.
     return Math.abs(a.y - b.y) < 50 && Math.abs((a.x + (a.string.length*(font.width / 3))) - b.x) < (font.width + 10);
   }
@@ -427,41 +435,45 @@ Command.prototype.contentStream = function () {
   }
 
   var stream = new Stream(), str = '', first = null, last = null, font = null, color = null, imgindex = 0;
-  this._commandStream().on('data', function (cmd) {
-    if (cmd.type == 'string') {
-      if (!last || isNextStringPartOfLastString(cmd, last, font)) {
-        str += decode(cmd.string);
-      } else {
+  this._commandStream()
+    .on('data', function (cmd) {
+      if (cmd.type == 'string') {
+        if (!last || isNextStringPartOfLastString(cmd, last, font)) {
+          str += decode(cmd.string);
+        } else {
+          stream.emit('data', {
+            type: 'string', x: (first || cmd).x, y: (first || cmd).y,
+            string: str, font: font, color: color
+          });
+          str = decode(cmd.string);
+          first = cmd;
+        }
+        last = cmd;
+      } else if (cmd.type == 'image') {
+        cmd.index = imgindex++;
+        stream.emit('data', cmd);
+      } else if (cmd.type == 'font') {
+        delete cmd.type;
+        font = cmd;
+      } else if (cmd.type == 'color') {
+        delete cmd.type;
+        color = cmd;
+      }
+    })
+    .on('end', function () {
+      if (str) {
         stream.emit('data', {
-          type: 'string', x: (first || cmd).x, y: (first || cmd).y,
+          type: 'string',
+          x: first ? first.x : 0,
+          y: first ? first.y : 0,
           string: str, font: font, color: color
         });
-        str = decode(cmd.string);
-        first = cmd;
+        str = '';
+        process.nextTick(function() {
+          stream.emit('end');
+        });
       }
-      last = cmd;
-    } else if (cmd.type == 'image') {
-      cmd.index = imgindex++;
-      stream.emit('data', cmd);
-    } else if (cmd.type == 'font') {
-      delete cmd.type;
-      font = cmd;
-    } else if (cmd.type == 'color') {
-      delete cmd.type;
-      color = cmd;
-    }
-  }).on('end', function () {
-    if (str) {
-      stream.emit('data', {
-        type: 'string', x: (first /*|| cmd*/).x, y: (first /*|| cmd*/).y,
-        string: str, font: font, color: color
-      });
-      str = '';
-      process.nextTick(function() {
-        stream.emit('end');
-      });
-    }
-  });
+    });
   return stream;
 };
 
