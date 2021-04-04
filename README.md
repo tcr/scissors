@@ -4,7 +4,10 @@
 PDF manipulation in Node.js, based on PDFTK! Split, join, crop, read, extract, 
 boil, mash, stick them in a stew.
 
-**This project is no longer actively maintained and we cannot respond to issues. Consider alternatives such as https://github.com/jjwilly16/node-pdftk**
+> This project is no longer actively maintained and we cannot respond to issues. 
+> Consider alternatives such as https://github.com/jjwilly16/node-pdftk 
+> 
+> Bug fixes are always welcome.
 
 ## Example
 
@@ -83,15 +86,30 @@ pdf.getNumPages().then(console.log); // prints the number of pages of the PDF
 Scissors is a wrapper around command line utilities (mainly PDFTK) that have to 
 be separately installed.
 
-* Install [PDFTK](http://www.pdflabs.com/docs/install-pdftk/) 
-  on your system. Mac OS >=10.11 requires a patched build available 
-  [here](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg) 
-  as per [this thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11)
+* Install [PDFTK](http://www.pdflabs.com/docs/install-pdftk/). For MacOS, see below.
 * Ensure you have Ghostscript installed (check by running `gs --version`).
 * To use the `getPageSizes` method, you need the imagemagick library, which provides the `identify` executable.
 * *(optional)* To extract individual images from a page with the 
   `extractImageStream()` method, install `pdfimages` with `brew install xpdf` or 
    `apt-get install poppler-utils`.
+
+## MacOS
+
+PDFTK does not run out-of-the box on Mac OS >=10.11. A patched build is
+available
+[here](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk_server-2.02-mac_osx-10.11-setup.pkg)
+as per [this
+thread](http://stackoverflow.com/questions/32505951/pdftk-server-on-os-x-10-11).
+Alternatively, use a dockerized executable such as
+https://hub.docker.com/r/jottr/alpine-pdftk. Remember that, in this case,  you
+need to pass read streams to the executable instead of file paths unless you
+mount the directories containing these paths to make them accessible for the
+docker image.
+
+## Testing
+
+The tests sometimes and unpredictably fail for unknown reasons, try to run them again to see whether the
+problem goes away.
 
 ## Dev resources
 - https://www.pdflabs.com/docs/pdftk-man-page/
