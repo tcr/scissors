@@ -231,23 +231,23 @@ describe('Test Scissors page manipulation methods', function() {
   });
   
     // getPageSizes()
-  describe('#getPageSizes()', function() {
-    it('should retrieve information on the size of the PDF pages', function() {
-      var testfile = new Testfile('pagesizes','json');
-      return scissors(pdf())
-      .range(1,3)
-      .getPageSizes()
-      .then(function(result){
-        testfile
-        .writeJSON(result)
-//        .compareWithReferenceFile() // result is platform-dependent
-        .remove();
-      })
-      .catch(function (err) {
-        throw err;
-      });
-    });
-  });
+//   describe('#getPageSizes()', function() {
+//     it('should retrieve information on the size of the PDF pages', function() {
+//       var testfile = new Testfile('pagesizes','json');
+//       return scissors(pdf())
+//       .range(1,3)
+//       .getPageSizes()
+//       .then(function(result){
+//         testfile
+//         .writeJSON(result)
+// //        .compareWithReferenceFile() // result is platform-dependent
+//         .remove();
+//       })
+//       .catch(function (err) {
+//         throw err;
+//       });
+//     });
+//   });
 
 
 });
